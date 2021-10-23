@@ -7,6 +7,7 @@ import OpenGLRenderer from './rendering/gl/OpenGLRenderer';
 import Camera from './Camera';
 import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
+import Cube from './geometry/Cube';
 
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
@@ -14,12 +15,15 @@ const controls = {
 };
 
 let square: Square;
+let cube: Cube;
 let screenQuad: ScreenQuad;
 let time: number = 0.0;
 
 function loadScene() {
   square = new Square();
   square.create();
+  cube = new Cube();
+  cube.create();
   screenQuad = new ScreenQuad();
   screenQuad.create();
 
@@ -45,8 +49,12 @@ function loadScene() {
   }
   let offsets: Float32Array = new Float32Array(offsetsArray);
   let colors: Float32Array = new Float32Array(colorsArray);
+
   square.setInstanceVBOs(offsets, colors);
   square.setNumInstances(n * n); // grid of "particles"
+
+  cube.setInstanceVBOs(offsets, colors);
+  cube.setNumInstances(n * n); // grid of "particles"
 }
 
 function main() {
@@ -100,9 +108,10 @@ function main() {
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
     renderer.render(camera, flat, [screenQuad]);
-    renderer.render(camera, instancedShader, [
-      square,
-    ]);
+
+    //renderer.render(camera, instancedShader, [square,]);
+    renderer.render(camera, instancedShader, [cube,]);
+
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame
