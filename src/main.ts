@@ -32,29 +32,32 @@ function loadScene() {
   // offsets and gradiated colors for a 100x100 grid
   // of squares, even though the VBO data for just
   // one square is actually passed to the GPU
-  let offsetsArray = [];
-  let colorsArray = [];
-  let n: number = 100.0;
-  for(let i = 0; i < n; i++) {
-    for(let j = 0; j < n; j++) {
-      offsetsArray.push(i);
-      offsetsArray.push(j);
+  let offsetsArray: number[] = [];
+  let colorsArray: number[] = [];
+  let rows: number = 10.0;
+  let cols: number = 10.0;
+  
+  for(let i = 0; i < rows; i++) {
+    for(let j = 0; j < cols; j++) {
+      offsetsArray.push(i * 10.0);
+      offsetsArray.push(j * 10.0);
       offsetsArray.push(0);
 
-      colorsArray.push(i / n);
-      colorsArray.push(j / n);
+      colorsArray.push(i / rows);
+      colorsArray.push(j / cols);
       colorsArray.push(1.0);
       colorsArray.push(1.0); // Alpha channel
     }
   }
+
   let offsets: Float32Array = new Float32Array(offsetsArray);
   let colors: Float32Array = new Float32Array(colorsArray);
 
   square.setInstanceVBOs(offsets, colors);
-  square.setNumInstances(n * n); // grid of "particles"
+  square.setNumInstances(rows * cols); // grid of "particles"
 
   cube.setInstanceVBOs(offsets, colors);
-  cube.setNumInstances(n * n); // grid of "particles"
+  cube.setNumInstances(rows * cols); // grid of "particles"
 }
 
 function main() {
@@ -86,8 +89,8 @@ function main() {
 
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.2, 0.2, 0.2, 1);
-  gl.enable(gl.BLEND);
-  gl.blendFunc(gl.ONE, gl.ONE); // Additive blending
+  //gl.enable(gl.BLEND);
+  //gl.blendFunc(gl.ONE, gl.ONE); // Additive blending
 
   const instancedShader = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/instanced-vert.glsl')),
