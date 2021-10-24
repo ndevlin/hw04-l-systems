@@ -8,7 +8,7 @@ import Camera from './Camera';
 import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 import Cube from './geometry/Cube';
-import DrawingRule from './DrawingRule';
+import LSystem from './LSystem';
 
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
@@ -28,160 +28,23 @@ function loadScene() {
   screenQuad = new ScreenQuad();
   screenQuad.create();
 
-  // Set up instanced rendering data arrays here.
-  // This example creates a set of positional
-  // offsets and gradiated colors for a 100x100 grid
-  // of squares, even though the VBO data for just
-  // one square is actually passed to the GPU
-  let offsetsArray: number[] = [];
-  let colorsArray: number[] = [];
-
-
-  // The transformation matrix to pass to the instancing shader
-  let col0: number[] = [];
-  let col1: number[] = [];
-  let col2: number[] = [];
-  let col3: number[] = [];
-
-  /*
-  let rows: number = 1.0;
-  let cols: number = 1.0;
-
-  for(let i = 0; i < rows * cols; i++)
-  {
-      colorsArray.push(i / rows);
-      colorsArray.push(i / cols);
-      colorsArray.push(1.0);
-      colorsArray.push(1.0); // Alpha channel
-  }
-
-  for(let i = 0; i < rows; i++) {
-    for(let j = 0; j < cols; j++) {
-      offsetsArray.push(i * 1.0);
-      offsetsArray.push(j * 1.0);
-      offsetsArray.push(0);
-    }
-  }
-  */
-
+  let lSystem: LSystem = new LSystem();
   
-  let numCylinders: number = 1.0;
-  
-  // Always draw 1 object
-  offsetsArray.push(0.0);
-  offsetsArray.push(0.0);
-  offsetsArray.push(0.0);
+  lSystem.computeDrawingData();
 
-  col0.push(1.0);
-  col0.push(0.0);
-  col0.push(0.0);
-  col0.push(0.0);
+  let offsets: Float32Array = new Float32Array(lSystem.offsetsArray);
+  let colors: Float32Array = new Float32Array(lSystem.colorsArray);
 
-  col1.push(0.0);
-  col1.push(1.0);
-  col1.push(0.0);
-  col1.push(0.0);
-
-  col2.push(0.0);
-  col2.push(0.0);
-  col2.push(1.0);
-  col2.push(0.0);
-
-  col3.push(0.0);
-  col3.push(0.0);
-  col3.push(0.0);
-  col3.push(1.0);
-
-  let currPos: vec4 = vec4.fromValues(0.0, 0.0, 0.0, 1.0);
-
-  let currDirection: vec4 = vec4.fromValues(0.0, 1.0, 0.0, 0.0);
-
-  let straight: mat4 = mat4.create();
-
-  let zAxis: vec3 = vec3.fromValues(0.0, 0.0, 1.0);
-
-  let theta: number = 3.14159 / 8.0;
-
-  let rotAboutZ = mat4.create();
-
-  mat4.fromRotation(rotAboutZ, theta, zAxis);
-
-  let drawF: DrawingRule = new DrawingRule(4.0, straight);
-
-  let drawG: DrawingRule = new DrawingRule(4.0, rotAboutZ);
-
-  let transformMat: mat4 = mat4.create();
-
-  let demoString: string[]= ["F", "G", "F", "G", "F",];
-
-  for(let c in demoString)
-  {
-    if(demoString[c] == "F")
-    {
-      // Change currDirection
-      currDirection = drawF.returnNewDirection(currDirection);
-      vec4.scaleAndAdd(currPos, currPos, currDirection, drawF.forwardAmount);
-      mat4.mul(transformMat, transformMat, drawF.orientationMat);
-    }
-    else if(demoString[c] == "G")
-    {
-      currDirection = drawG.returnNewDirection(currDirection);
-      vec4.scaleAndAdd(currPos, currPos, currDirection, drawG.forwardAmount);
-      mat4.mul(transformMat, transformMat, drawG.orientationMat);
-    }
-
-    col0.push(transformMat[0]);
-    col0.push(transformMat[1]);
-    col0.push(transformMat[2]);
-    col0.push(transformMat[3]);
-
-    col1.push(transformMat[4]);
-    col1.push(transformMat[5]);
-    col1.push(transformMat[6]);
-    col1.push(transformMat[7]);
-
-    col2.push(transformMat[8]);
-    col2.push(transformMat[9]);
-    col2.push(transformMat[10]);
-    col2.push(transformMat[11]);
-
-    col3.push(transformMat[12]);
-    col3.push(transformMat[13]);
-    col3.push(transformMat[14]);
-    col3.push(transformMat[15]);
-
-
-
-    offsetsArray.push(currPos[0]);
-    offsetsArray.push(currPos[1]);
-    offsetsArray.push(currPos[2]);
-    numCylinders++;
-  }
-  
-  
-  for(let i = 0; i < numCylinders; i++)
-  {
-      colorsArray.push(1.0);
-      colorsArray.push(0.0);
-      colorsArray.push(0.0);
-      colorsArray.push(1.0); // Alpha channel
-  }
-  
-
-
-  let offsets: Float32Array = new Float32Array(offsetsArray);
-  let colors: Float32Array = new Float32Array(colorsArray);
-
-  let col0Out: Float32Array = new Float32Array(col0);
-  let col1Out: Float32Array = new Float32Array(col1);
-  let col2Out: Float32Array = new Float32Array(col2);
-  let col3Out: Float32Array = new Float32Array(col3);
+  let col0Out: Float32Array = new Float32Array(lSystem.col0);
+  let col1Out: Float32Array = new Float32Array(lSystem.col1);
+  let col2Out: Float32Array = new Float32Array(lSystem.col2);
+  let col3Out: Float32Array = new Float32Array(lSystem.col3);
 
   square.setInstanceVBOs(offsets, colors);
-  square.setNumInstances(numCylinders); // grid of "particles"
+  square.setNumInstances(lSystem.numCylinders); // grid of "particles"
 
   cube.setInstanceVBOs(offsets, colors, col0Out, col1Out, col2Out, col3Out);
-  cube.setNumInstances(numCylinders); // grid of "particles"
+  cube.setNumInstances(lSystem.numCylinders); // grid of "particles"
 }
 
 function main() {
