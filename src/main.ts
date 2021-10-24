@@ -35,20 +35,30 @@ function loadScene() {
   let offsetsArray: number[] = [];
   let colorsArray: number[] = [];
   let rows: number = 10.0;
-  let cols: number = 10.0;
+  let cols: number = 1.0;
+
+
+  for(let i = 0; i < rows * cols; i++)
+  {
+      colorsArray.push(i / rows);
+      colorsArray.push(i / cols);
+      colorsArray.push(1.0);
+      colorsArray.push(1.0); // Alpha channel
+  }
+
   
   for(let i = 0; i < rows; i++) {
     for(let j = 0; j < cols; j++) {
-      offsetsArray.push(i * 10.0);
-      offsetsArray.push(j * 10.0);
+      offsetsArray.push(i * 1.0);
+      offsetsArray.push(j * 1.0);
       offsetsArray.push(0);
-
-      colorsArray.push(i / rows);
-      colorsArray.push(j / cols);
-      colorsArray.push(1.0);
-      colorsArray.push(1.0); // Alpha channel
     }
   }
+
+
+
+
+
 
   let offsets: Float32Array = new Float32Array(offsetsArray);
   let colors: Float32Array = new Float32Array(colorsArray);

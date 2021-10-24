@@ -15,5 +15,5 @@ void main()
 
     //out_Col = fs_Col;
 
-    out_Col = vec4(1.0, 0.0, 0.0, 1.0);
+    out_Col = vec4(0.4588, 0.2353, 0.1333, 1.0);
 }
