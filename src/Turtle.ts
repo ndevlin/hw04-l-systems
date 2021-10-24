@@ -1,7 +1,7 @@
 
 import {vec3, vec4} from 'gl-matrix';
 
-class Turtle
+export default class Turtle
 {
     position: vec3;
     orientation: vec3;

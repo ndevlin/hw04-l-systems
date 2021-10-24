@@ -27,6 +27,13 @@ class ShaderProgram {
   attrTranslate: number; // Used in the vertex shader during instanced rendering to offset the vertex positions to the particle's drawn position.
   attrUV: number;
 
+  // The transformation matrix
+  attrMatCol0: number;
+  attrMatCol1: number;
+  attrMatCol2: number;
+  attrMatCol3: number;
+
+
   unifModel: WebGLUniformLocation;
   unifModelInvTr: WebGLUniformLocation;
   unifViewProj: WebGLUniformLocation;
@@ -55,6 +62,16 @@ class ShaderProgram {
 
     this.attrTranslate = gl.getAttribLocation(this.prog, "vs_Translate");
     this.attrUV = gl.getAttribLocation(this.prog, "vs_UV");
+    
+    
+    this.attrMatCol0 = gl.getAttribLocation(this.prog, "vs_matCol0");
+    this.attrMatCol1 = gl.getAttribLocation(this.prog, "vs_matCol1");
+    this.attrMatCol2 = gl.getAttribLocation(this.prog, "vs_matCol2");
+    this.attrMatCol3 = gl.getAttribLocation(this.prog, "vs_matCol3");
+
+    
+    
+    
     this.unifModel      = gl.getUniformLocation(this.prog, "u_Model");
     this.unifModelInvTr = gl.getUniformLocation(this.prog, "u_ModelInvTr");
     this.unifViewProj   = gl.getUniformLocation(this.prog, "u_ViewProj");
@@ -147,6 +164,33 @@ class ShaderProgram {
       gl.vertexAttribPointer(this.attrCol, 4, gl.FLOAT, false, 0, 0);
       gl.vertexAttribDivisor(this.attrCol, 1); // Advance 1 index in col VBO for each drawn instance
     }
+
+
+
+    if (this.attrMatCol0 != -1 && d.bindMatCol0()) {
+      gl.enableVertexAttribArray(this.attrMatCol0);
+      gl.vertexAttribPointer(this.attrMatCol0, 4, gl.FLOAT, false, 0, 0);
+      gl.vertexAttribDivisor(this.attrMatCol0, 1); // Advance 1 index for each drawn instance
+    }
+
+    if (this.attrMatCol1 != -1 && d.bindMatCol1()) {
+      gl.enableVertexAttribArray(this.attrMatCol1);
+      gl.vertexAttribPointer(this.attrMatCol1, 4, gl.FLOAT, false, 0, 0);
+      gl.vertexAttribDivisor(this.attrMatCol1, 1); // Advance 1 index for each drawn instance
+    }
+
+    if (this.attrMatCol2 != -1 && d.bindMatCol2()) {
+      gl.enableVertexAttribArray(this.attrMatCol2);
+      gl.vertexAttribPointer(this.attrMatCol2, 4, gl.FLOAT, false, 0, 0);
+      gl.vertexAttribDivisor(this.attrMatCol2, 1); // Advance 1 indexfor each drawn instance
+    }
+
+    if (this.attrMatCol3 != -1 && d.bindMatCol3()) {
+      gl.enableVertexAttribArray(this.attrMatCol3);
+      gl.vertexAttribPointer(this.attrMatCol3, 4, gl.FLOAT, false, 0, 0);
+      gl.vertexAttribDivisor(this.attrMatCol3, 1); // Advance 1 index for each drawn instance
+    }
+
 
     if (this.attrTranslate != -1 && d.bindTranslate()) {
       gl.enableVertexAttribArray(this.attrTranslate);

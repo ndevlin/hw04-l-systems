@@ -1,5 +1,5 @@
 
-class ExpansionRule
+export default class ExpansionRule
 {
     numExpansions: number;
 

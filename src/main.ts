@@ -35,7 +35,14 @@ function loadScene() {
   // one square is actually passed to the GPU
   let offsetsArray: number[] = [];
   let colorsArray: number[] = [];
-  
+
+
+  // The transformation matrix to pass to the instancing shader
+  let col0: number[] = [];
+  let col1: number[] = [];
+  let col2: number[] = [];
+  let col3: number[] = [];
+
   /*
   let rows: number = 1.0;
   let cols: number = 1.0;
@@ -60,10 +67,30 @@ function loadScene() {
   
   let numCylinders: number = 1.0;
   
+  // Always draw 1 object
   offsetsArray.push(0.0);
   offsetsArray.push(0.0);
   offsetsArray.push(0.0);
-  
+
+  col0.push(1.0);
+  col0.push(0.0);
+  col0.push(0.0);
+  col0.push(0.0);
+
+  col1.push(0.0);
+  col1.push(1.0);
+  col1.push(0.0);
+  col1.push(0.0);
+
+  col2.push(0.0);
+  col2.push(0.0);
+  col2.push(1.0);
+  col2.push(0.0);
+
+  col3.push(0.0);
+  col3.push(0.0);
+  col3.push(0.0);
+  col3.push(1.0);
 
   let currPos: vec4 = vec4.fromValues(0.0, 0.0, 0.0, 1.0);
 
@@ -71,21 +98,64 @@ function loadScene() {
 
   let straight: mat4 = mat4.create();
 
-  let drawF: DrawingRule = new DrawingRule(2.0, straight);
+  let zAxis: vec3 = vec3.fromValues(0.0, 0.0, 1.0);
 
-  let demoString: string[]= ["F", "F", "F", "F", "F",];
+  let theta: number = 3.14159 / 8.0;
+
+  let rotAboutZ = mat4.create();
+
+  mat4.fromRotation(rotAboutZ, theta, zAxis);
+
+  let drawF: DrawingRule = new DrawingRule(4.0, straight);
+
+  let drawG: DrawingRule = new DrawingRule(4.0, rotAboutZ);
+
+  let transformMat: mat4 = mat4.create();
+
+  let demoString: string[]= ["F", "G", "F", "G", "F",];
 
   for(let c in demoString)
   {
     if(demoString[c] == "F")
     {
-      // Move currPos forward according to the drawing rule
-      currPos = drawF.returnNewPoint(currPos, currDirection);
-      offsetsArray.push(currPos[0]);
-      offsetsArray.push(currPos[1]);
-      offsetsArray.push(currPos[2]);
-      numCylinders++;
+      // Change currDirection
+      currDirection = drawF.returnNewDirection(currDirection);
+      vec4.scaleAndAdd(currPos, currPos, currDirection, drawF.forwardAmount);
+      mat4.mul(transformMat, transformMat, drawF.orientationMat);
     }
+    else if(demoString[c] == "G")
+    {
+      currDirection = drawG.returnNewDirection(currDirection);
+      vec4.scaleAndAdd(currPos, currPos, currDirection, drawG.forwardAmount);
+      mat4.mul(transformMat, transformMat, drawG.orientationMat);
+    }
+
+    col0.push(transformMat[0]);
+    col0.push(transformMat[1]);
+    col0.push(transformMat[2]);
+    col0.push(transformMat[3]);
+
+    col1.push(transformMat[4]);
+    col1.push(transformMat[5]);
+    col1.push(transformMat[6]);
+    col1.push(transformMat[7]);
+
+    col2.push(transformMat[8]);
+    col2.push(transformMat[9]);
+    col2.push(transformMat[10]);
+    col2.push(transformMat[11]);
+
+    col3.push(transformMat[12]);
+    col3.push(transformMat[13]);
+    col3.push(transformMat[14]);
+    col3.push(transformMat[15]);
+
+
+
+    offsetsArray.push(currPos[0]);
+    offsetsArray.push(currPos[1]);
+    offsetsArray.push(currPos[2]);
+    numCylinders++;
   }
   
   
@@ -102,10 +172,15 @@ function loadScene() {
   let offsets: Float32Array = new Float32Array(offsetsArray);
   let colors: Float32Array = new Float32Array(colorsArray);
 
+  let col0Out: Float32Array = new Float32Array(col0);
+  let col1Out: Float32Array = new Float32Array(col1);
+  let col2Out: Float32Array = new Float32Array(col2);
+  let col3Out: Float32Array = new Float32Array(col3);
+
   square.setInstanceVBOs(offsets, colors);
   square.setNumInstances(numCylinders); // grid of "particles"
 
-  cube.setInstanceVBOs(offsets, colors);
+  cube.setInstanceVBOs(offsets, colors, col0Out, col1Out, col2Out, col3Out);
   cube.setNumInstances(numCylinders); // grid of "particles"
 }
 
@@ -134,7 +209,7 @@ function main() {
   // Initial call to load scene
   loadScene();
 
-  const camera = new Camera(vec3.fromValues(0, 0, 20), vec3.fromValues(0, 0, 0));
+  const camera = new Camera(vec3.fromValues(0, 0, 50), vec3.fromValues(0, 0, 0));
 
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.2, 0.2, 0.2, 1);

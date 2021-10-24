@@ -14,17 +14,13 @@ export default class DrawingRule
     }
 
 
-    returnNewPoint(startingPoint: vec4, startingDirection: vec4): vec4
+    returnNewDirection(startingDirection: vec4): vec4
     {
-        let newPoint: vec4 = vec4.fromValues(0.0, 0.0, 0.0, 1.0);
+        let newDirection: vec4 = vec4.fromValues(0.0, 0.0, 0.0, 1.0);
     
-        let newDirection: vec4 = vec4.fromValues(0.0, 0.0, 0.0, 0.0);
-
         vec4.transformMat4(newDirection, startingDirection, this.orientationMat);
 
-        vec4.scaleAndAdd(newPoint, startingPoint, newDirection, this.forwardAmount);
-
-        return newPoint;
+        return newDirection;
     }
 
 }
