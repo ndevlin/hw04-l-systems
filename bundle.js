@@ -6040,16 +6040,18 @@ function loadScene() {
     let offsetsArray = [];
     let colorsArray = [];
     let rows = 10.0;
-    let cols = 10.0;
+    let cols = 1.0;
+    for (let i = 0; i < rows * cols; i++) {
+        colorsArray.push(i / rows);
+        colorsArray.push(i / cols);
+        colorsArray.push(1.0);
+        colorsArray.push(1.0); // Alpha channel
+    }
     for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
-            offsetsArray.push(i * 10.0);
-            offsetsArray.push(j * 10.0);
+            offsetsArray.push(i * 1.0);
+            offsetsArray.push(j * 1.0);
             offsetsArray.push(0);
-            colorsArray.push(i / rows);
-            colorsArray.push(j / cols);
-            colorsArray.push(1.0);
-            colorsArray.push(1.0); // Alpha channel
         }
     }
     let offsets = new Float32Array(offsetsArray);
@@ -16658,7 +16660,7 @@ module.exports = "#version 300 es\n\nuniform mat4 u_ViewProj;\nuniform float u_T
 /* 71 */
 /***/ (function(module, exports) {
 
-module.exports = "#version 300 es\nprecision highp float;\n\nin vec4 fs_Col;\nin vec4 fs_Pos;\n\nin vec4 fs_Nor;\n\nout vec4 out_Col;\n\nvoid main()\n{\n    //float dist = 1.0 - (length(fs_Pos.xyz) * 2.0);\n    //out_Col = vec4(dist) * fs_Col;\n\n    //out_Col = fs_Col;\n\n    out_Col = vec4(1.0, 0.0, 0.0, 1.0);\n}\n"
+module.exports = "#version 300 es\nprecision highp float;\n\nin vec4 fs_Col;\nin vec4 fs_Pos;\n\nin vec4 fs_Nor;\n\nout vec4 out_Col;\n\nvoid main()\n{\n    //float dist = 1.0 - (length(fs_Pos.xyz) * 2.0);\n    //out_Col = vec4(dist) * fs_Col;\n\n    //out_Col = fs_Col;\n\n    out_Col = vec4(0.4588, 0.2353, 0.1333, 1.0);\n}\n"
 
 /***/ }),
 /* 72 */
