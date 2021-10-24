@@ -1,4 +1,4 @@
-import {vec3} from 'gl-matrix';
+import {vec3, vec4, mat4} from 'gl-matrix';
 import * as Stats from 'stats-js';
 import * as DAT from 'dat-gui';
 import Square from './geometry/Square';
@@ -8,6 +8,7 @@ import Camera from './Camera';
 import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 import Cube from './geometry/Cube';
+import DrawingRule from './DrawingRule';
 
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
@@ -34,9 +35,10 @@ function loadScene() {
   // one square is actually passed to the GPU
   let offsetsArray: number[] = [];
   let colorsArray: number[] = [];
-  let rows: number = 10.0;
+  
+  /*
+  let rows: number = 1.0;
   let cols: number = 1.0;
-
 
   for(let i = 0; i < rows * cols; i++)
   {
@@ -46,7 +48,6 @@ function loadScene() {
       colorsArray.push(1.0); // Alpha channel
   }
 
-  
   for(let i = 0; i < rows; i++) {
     for(let j = 0; j < cols; j++) {
       offsetsArray.push(i * 1.0);
@@ -54,20 +55,58 @@ function loadScene() {
       offsetsArray.push(0);
     }
   }
+  */
 
+  
+  let numCylinders: number = 1.0;
+  
+  offsetsArray.push(0.0);
+  offsetsArray.push(0.0);
+  offsetsArray.push(0.0);
+  
 
+  let currPos: vec4 = vec4.fromValues(0.0, 0.0, 0.0, 1.0);
 
+  let currDirection: vec4 = vec4.fromValues(0.0, 1.0, 0.0, 0.0);
 
+  let straight: mat4 = mat4.create();
+
+  let drawF: DrawingRule = new DrawingRule(2.0, straight);
+
+  let demoString: string[]= ["F", "F", "F", "F", "F",];
+
+  for(let c in demoString)
+  {
+    if(demoString[c] == "F")
+    {
+      // Move currPos forward according to the drawing rule
+      currPos = drawF.returnNewPoint(currPos, currDirection);
+      offsetsArray.push(currPos[0]);
+      offsetsArray.push(currPos[1]);
+      offsetsArray.push(currPos[2]);
+      numCylinders++;
+    }
+  }
+  
+  
+  for(let i = 0; i < numCylinders; i++)
+  {
+      colorsArray.push(1.0);
+      colorsArray.push(0.0);
+      colorsArray.push(0.0);
+      colorsArray.push(1.0); // Alpha channel
+  }
+  
 
 
   let offsets: Float32Array = new Float32Array(offsetsArray);
   let colors: Float32Array = new Float32Array(colorsArray);
 
   square.setInstanceVBOs(offsets, colors);
-  square.setNumInstances(rows * cols); // grid of "particles"
+  square.setNumInstances(numCylinders); // grid of "particles"
 
   cube.setInstanceVBOs(offsets, colors);
-  cube.setNumInstances(rows * cols); // grid of "particles"
+  cube.setNumInstances(numCylinders); // grid of "particles"
 }
 
 function main() {
@@ -95,7 +134,7 @@ function main() {
   // Initial call to load scene
   loadScene();
 
-  const camera = new Camera(vec3.fromValues(50, 50, 10), vec3.fromValues(50, 50, 0));
+  const camera = new Camera(vec3.fromValues(0, 0, 20), vec3.fromValues(0, 0, 0));
 
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.2, 0.2, 0.2, 1);

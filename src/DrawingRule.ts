@@ -1,7 +1,7 @@
 
 import {vec3, vec4, mat3, mat4} from 'gl-matrix';
 
-class DrawingRule
+export default class DrawingRule
 {
     forwardAmount: number;
     orientationMat: mat4
