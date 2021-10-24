@@ -6008,6 +6008,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__globals__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__ = __webpack_require__(68);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__geometry_Cube__ = __webpack_require__(69);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__DrawingRule__ = __webpack_require__(70);
+
 
 
 
@@ -6039,27 +6041,57 @@ function loadScene() {
     // one square is actually passed to the GPU
     let offsetsArray = [];
     let colorsArray = [];
-    let rows = 10.0;
-    let cols = 1.0;
-    for (let i = 0; i < rows * cols; i++) {
+    /*
+    let rows: number = 1.0;
+    let cols: number = 1.0;
+  
+    for(let i = 0; i < rows * cols; i++)
+    {
         colorsArray.push(i / rows);
         colorsArray.push(i / cols);
         colorsArray.push(1.0);
         colorsArray.push(1.0); // Alpha channel
     }
-    for (let i = 0; i < rows; i++) {
-        for (let j = 0; j < cols; j++) {
-            offsetsArray.push(i * 1.0);
-            offsetsArray.push(j * 1.0);
-            offsetsArray.push(0);
+  
+    for(let i = 0; i < rows; i++) {
+      for(let j = 0; j < cols; j++) {
+        offsetsArray.push(i * 1.0);
+        offsetsArray.push(j * 1.0);
+        offsetsArray.push(0);
+      }
+    }
+    */
+    let numCylinders = 1.0;
+    offsetsArray.push(0.0);
+    offsetsArray.push(0.0);
+    offsetsArray.push(0.0);
+    let currPos = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.0, 0.0, 0.0, 1.0);
+    let currDirection = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.0, 1.0, 0.0, 0.0);
+    let straight = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
+    let drawF = new __WEBPACK_IMPORTED_MODULE_10__DrawingRule__["a" /* default */](2.0, straight);
+    let demoString = ["F", "F", "F", "F", "F",];
+    for (let c in demoString) {
+        if (demoString[c] == "F") {
+            // Move currPos forward according to the drawing rule
+            currPos = drawF.returnNewPoint(currPos, currDirection);
+            offsetsArray.push(currPos[0]);
+            offsetsArray.push(currPos[1]);
+            offsetsArray.push(currPos[2]);
+            numCylinders++;
         }
+    }
+    for (let i = 0; i < numCylinders; i++) {
+        colorsArray.push(1.0);
+        colorsArray.push(0.0);
+        colorsArray.push(0.0);
+        colorsArray.push(1.0); // Alpha channel
     }
     let offsets = new Float32Array(offsetsArray);
     let colors = new Float32Array(colorsArray);
     square.setInstanceVBOs(offsets, colors);
-    square.setNumInstances(rows * cols); // grid of "particles"
+    square.setNumInstances(numCylinders); // grid of "particles"
     cube.setInstanceVBOs(offsets, colors);
-    cube.setNumInstances(rows * cols); // grid of "particles"
+    cube.setNumInstances(numCylinders); // grid of "particles"
 }
 function main() {
     // Initial display for framerate
@@ -6082,18 +6114,18 @@ function main() {
     Object(__WEBPACK_IMPORTED_MODULE_7__globals__["b" /* setGL */])(gl);
     // Initial call to load scene
     loadScene();
-    const camera = new __WEBPACK_IMPORTED_MODULE_6__Camera__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(50, 50, 10), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(50, 50, 0));
+    const camera = new __WEBPACK_IMPORTED_MODULE_6__Camera__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0, 0, 20), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0, 0, 0));
     const renderer = new __WEBPACK_IMPORTED_MODULE_5__rendering_gl_OpenGLRenderer__["a" /* default */](canvas);
     renderer.setClearColor(0.2, 0.2, 0.2, 1);
     //gl.enable(gl.BLEND);
     //gl.blendFunc(gl.ONE, gl.ONE); // Additive blending
     const instancedShader = new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["b" /* default */]([
-        new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["a" /* Shader */](gl.VERTEX_SHADER, __webpack_require__(70)),
-        new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["a" /* Shader */](gl.FRAGMENT_SHADER, __webpack_require__(71)),
+        new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["a" /* Shader */](gl.VERTEX_SHADER, __webpack_require__(71)),
+        new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["a" /* Shader */](gl.FRAGMENT_SHADER, __webpack_require__(72)),
     ]);
     const flat = new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["b" /* default */]([
-        new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["a" /* Shader */](gl.VERTEX_SHADER, __webpack_require__(72)),
-        new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["a" /* Shader */](gl.FRAGMENT_SHADER, __webpack_require__(73)),
+        new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["a" /* Shader */](gl.VERTEX_SHADER, __webpack_require__(73)),
+        new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["a" /* Shader */](gl.FRAGMENT_SHADER, __webpack_require__(74)),
     ]);
     // This function will be called every frame
     function tick() {
@@ -13264,7 +13296,7 @@ class Camera {
         this.forward = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].create();
         const canvas = document.getElementById('canvas');
         this.controls = CameraControls(canvas, {
-            position: position,
+            eye: position,
             center: target,
         });
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].add(this.target, this.position, this.direction);
@@ -16652,27 +16684,51 @@ class Cube extends __WEBPACK_IMPORTED_MODULE_1__rendering_gl_Drawable__["a" /* d
 
 /***/ }),
 /* 70 */
-/***/ (function(module, exports) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-module.exports = "#version 300 es\n\nuniform mat4 u_ViewProj;\nuniform float u_Time;\n\nuniform mat3 u_CameraAxes; // Used for rendering particles as billboards (quads that are always looking at the camera)\n// gl_Position = center + vs_Pos.x * camRight + vs_Pos.y * camUp;\n\nin vec4 vs_Pos; // Non-instanced; each particle is the same quad drawn in a different place\nin vec4 vs_Nor; // Non-instanced, and presently unused\nin vec4 vs_Col; // An instanced rendering attribute; each particle instance has a different color\nin vec3 vs_Translate; // Another instance rendering attribute used to position each quad instance in the scene\nin vec2 vs_UV; // Non-instanced, and presently unused in main(). Feel free to use it for your meshes.\n\nout vec4 fs_Col;\nout vec4 fs_Pos;\n\nout vec4 fs_Nor;\n\nvoid main()\n{\n    fs_Col = vs_Col;\n    fs_Pos = vs_Pos;\n\n    fs_Nor = vs_Nor;\n\n    vec3 offset = vs_Translate;\n\n    vec4 newPos = vec4(vec3(vs_Pos) + offset, 1.0);\n\n    gl_Position = u_ViewProj * newPos;\n\n    //offset.z = (sin((u_Time + offset.x) * 3.14159 * 0.1) + cos((u_Time + offset.y) * 3.14159 * 0.1)) * 1.5;\n    //vec3 billboardPos = offset + vs_Pos.x * u_CameraAxes[0] + vs_Pos.y * u_CameraAxes[1];\n    //gl_Position = u_ViewProj * vec4(billboardPos, 1.0);\n}\n"
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_gl_matrix__ = __webpack_require__(2);
+
+class DrawingRule {
+    constructor(forwardAmountIn, orientationMatIn) {
+        this.forwardAmount = forwardAmountIn;
+        this.orientationMat = orientationMatIn;
+    }
+    returnNewPoint(startingPoint, startingDirection) {
+        let newPoint = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.0, 0.0, 0.0, 1.0);
+        let newDirection = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.0, 0.0, 0.0, 0.0);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].transformMat4(newDirection, startingDirection, this.orientationMat);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(newPoint, startingPoint, newDirection, this.forwardAmount);
+        return newPoint;
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = DrawingRule;
+
+
 
 /***/ }),
 /* 71 */
 /***/ (function(module, exports) {
 
-module.exports = "#version 300 es\nprecision highp float;\n\nin vec4 fs_Col;\nin vec4 fs_Pos;\n\nin vec4 fs_Nor;\n\nout vec4 out_Col;\n\nvoid main()\n{\n    //float dist = 1.0 - (length(fs_Pos.xyz) * 2.0);\n    //out_Col = vec4(dist) * fs_Col;\n\n    //out_Col = fs_Col;\n\n    out_Col = vec4(0.4588, 0.2353, 0.1333, 1.0);\n}\n"
+module.exports = "#version 300 es\n\nuniform mat4 u_ViewProj;\nuniform float u_Time;\n\nuniform mat3 u_CameraAxes; // Used for rendering particles as billboards (quads that are always looking at the camera)\n// gl_Position = center + vs_Pos.x * camRight + vs_Pos.y * camUp;\n\nin vec4 vs_Pos; // Non-instanced; each particle is the same quad drawn in a different place\nin vec4 vs_Nor; // Non-instanced, and presently unused\nin vec4 vs_Col; // An instanced rendering attribute; each particle instance has a different color\nin vec3 vs_Translate; // Another instance rendering attribute used to position each quad instance in the scene\nin vec2 vs_UV; // Non-instanced, and presently unused in main(). Feel free to use it for your meshes.\n\nout vec4 fs_Col;\nout vec4 fs_Pos;\n\nout vec4 fs_Nor;\n\nvoid main()\n{\n    fs_Col = vs_Col;\n    fs_Pos = vs_Pos;\n\n    fs_Nor = vs_Nor;\n\n    vec3 offset = vs_Translate;\n\n    vec4 newPos = vec4(vec3(vs_Pos) + offset, 1.0);\n\n    gl_Position = u_ViewProj * newPos;\n\n    //offset.z = (sin((u_Time + offset.x) * 3.14159 * 0.1) + cos((u_Time + offset.y) * 3.14159 * 0.1)) * 1.5;\n    //vec3 billboardPos = offset + vs_Pos.x * u_CameraAxes[0] + vs_Pos.y * u_CameraAxes[1];\n    //gl_Position = u_ViewProj * vec4(billboardPos, 1.0);\n}\n"
 
 /***/ }),
 /* 72 */
 /***/ (function(module, exports) {
 
-module.exports = "#version 300 es\nprecision highp float;\n\n// The vertex shader used to render the background of the scene\n\nin vec4 vs_Pos;\nout vec2 fs_Pos;\n\nvoid main() {\n  fs_Pos = vs_Pos.xy;\n  gl_Position = vs_Pos;\n}\n"
+module.exports = "#version 300 es\nprecision highp float;\n\nin vec4 fs_Col;\nin vec4 fs_Pos;\n\nin vec4 fs_Nor;\n\nout vec4 out_Col;\n\nvoid main()\n{\n    //float dist = 1.0 - (length(fs_Pos.xyz) * 2.0);\n    //out_Col = vec4(dist) * fs_Col;\n\n    //out_Col = fs_Col;\n\n    out_Col = vec4(0.4588, 0.2353, 0.1333, 1.0);\n}\n"
 
 /***/ }),
 /* 73 */
 /***/ (function(module, exports) {
 
-module.exports = "#version 300 es\nprecision highp float;\n\nuniform vec3 u_Eye, u_Ref, u_Up;\nuniform vec2 u_Dimensions;\nuniform float u_Time;\n\nin vec2 fs_Pos;\nout vec4 out_Col;\n\nvoid main() \n{\n  out_Col = vec4(0.5 * (fs_Pos + vec2(1.0)), 0.0, 1.0);\n\n  out_Col = vec4(0.0, 0.0, 0.0, 1.0);\n}\n"
+module.exports = "#version 300 es\nprecision highp float;\n\n// The vertex shader used to render the background of the scene\n\nin vec4 vs_Pos;\nout vec2 fs_Pos;\n\nvoid main() {\n  fs_Pos = vs_Pos.xy;\n  gl_Position = vs_Pos;\n}\n"
+
+/***/ }),
+/* 74 */
+/***/ (function(module, exports) {
+
+module.exports = "#version 300 es\nprecision highp float;\n\nuniform vec3 u_Eye, u_Ref, u_Up;\nuniform vec2 u_Dimensions;\nuniform float u_Time;\n\nin vec2 fs_Pos;\nout vec4 out_Col;\n\nvoid main() \n{\n  //out_Col = vec4(0.5 * (fs_Pos + vec2(1.0)), 0.0, 1.0);\n\n  out_Col = vec4(0.0, 0.0, 0.0, 1.0);\n}\n"
 
 /***/ })
 /******/ ]);
