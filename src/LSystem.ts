@@ -23,11 +23,17 @@ export default class LSystem
 
     numCylinders: number;
 
+    
+    drawRules: Map<string, any>;
 
     constructor()
     {
+        this.drawRules = new Map();
+        this.drawRules.set('F', this.moveForward);
+        this.drawRules.set('+', this.rotateLeft);
+
         this.turtleArr = [];
-        this.grammarString = ["F", "G", "F", "G", "G", "F"];
+        this.grammarString = ["F", "+", "F", "+", "+", "F"];
         this.axiomString = "F";
         this.currTurtle = 0;
 
@@ -40,6 +46,7 @@ export default class LSystem
         this.col3 = [];
 
         this.numCylinders = 1;
+
     }
 
 
@@ -96,36 +103,14 @@ export default class LSystem
 
         let currDirection: vec4 = vec4.fromValues(0.0, 1.0, 0.0, 0.0);
 
-        let straight: mat4 = mat4.create();
-
-        let zAxis: vec3 = vec3.fromValues(0.0, 0.0, 1.0);
-
-        let theta: number = 3.14159 / 8.0;
-
-        let rotAboutZ = mat4.create();
-
-        mat4.fromRotation(rotAboutZ, theta, zAxis);
-
-        let drawF: DrawingRule = new DrawingRule(4.0, straight);
-
-        let drawG: DrawingRule = new DrawingRule(4.0, rotAboutZ);
-
         let transformMat: mat4 = mat4.create();
 
         for(let c in this.grammarString)
         {
-            if(this.grammarString[c] == "F")
+            let func = this.drawRules.get(this.grammarString[c]);
+            if(func)
             {
-            // Change currDirection
-            currDirection = drawF.returnNewDirection(currDirection);
-            vec4.scaleAndAdd(currPos, currPos, currDirection, drawF.forwardAmount);
-            mat4.mul(transformMat, transformMat, drawF.orientationMat);
-            }
-            else if(this.grammarString[c] == "G")
-            {
-            currDirection = drawG.returnNewDirection(currDirection);
-            vec4.scaleAndAdd(currPos, currPos, currDirection, drawG.forwardAmount);
-            mat4.mul(transformMat, transformMat, drawG.orientationMat);
+               currDirection = func(currPos, currDirection, transformMat);
             }
 
             this.col0.push(transformMat[0]);
@@ -164,6 +149,29 @@ export default class LSystem
             this.colorsArray.push(0.0);
             this.colorsArray.push(1.0); // Alpha channel
         }
+    }
+
+    moveForward(currPos: vec4, currDirection: vec4, transformMat: mat4): vec4
+    {
+        let straight: mat4 = mat4.create();
+        let moveForwardRule = new DrawingRule(4.0, straight);
+        currDirection = moveForwardRule.returnNewDirection(currDirection);
+        vec4.scaleAndAdd(currPos, currPos, currDirection, moveForwardRule.forwardAmount);
+        mat4.mul(transformMat, transformMat, moveForwardRule.orientationMat);
+        return currDirection;
+    }
+
+    rotateLeft(currPos: vec4, currDirection: vec4, transformMat: mat4): vec4
+    {
+        let zAxis: vec3 = vec3.fromValues(0.0, 0.0, 1.0);
+        let theta: number = 3.14159 / 8.0;
+        let rotAboutZ = mat4.create();
+        mat4.fromRotation(rotAboutZ, theta, zAxis);
+        let rotateAboutZ = new DrawingRule(4.0, rotAboutZ);
+        currDirection = rotateAboutZ.returnNewDirection(currDirection);
+        vec4.scaleAndAdd(currPos, currPos, currDirection, rotateAboutZ.forwardAmount);
+        mat4.mul(transformMat, transformMat, rotateAboutZ.orientationMat);
+        return currDirection;
     }
 
 }
