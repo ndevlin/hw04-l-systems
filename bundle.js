@@ -16739,8 +16739,12 @@ class LSystem {
     constructor() {
         this.drawRules = new Map();
         this.drawRules.set('F', this.moveForward.bind(this));
-        this.drawRules.set('+', this.rotateLeftZ.bind(this));
-        this.drawRules.set('-', this.rotateRightZ.bind(this));
+        this.drawRules.set('+Z', this.rotateLeftZ.bind(this));
+        this.drawRules.set('-Z', this.rotateRightZ.bind(this));
+        this.drawRules.set('+X', this.rotateLeftX.bind(this));
+        this.drawRules.set('-X', this.rotateRightX.bind(this));
+        this.drawRules.set('+Y', this.rotateLeftY.bind(this));
+        this.drawRules.set('-Y', this.rotateRightY.bind(this));
         this.drawRules.set('[', this.storeTurtle.bind(this));
         this.drawRules.set(']', this.loadTurtle.bind(this));
         this.currRecursionLevel = 1;
@@ -16750,8 +16754,8 @@ class LSystem {
         this.theta = 3.14159 / 8.0;
         let startingTurtle = new __WEBPACK_IMPORTED_MODULE_2__Turtle__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 0.0, 0.0), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 1.0, 0.0), 1, __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create());
         this.turtleArr = [startingTurtle];
-        this.grammarString = ["F", "F", "-", "[", "-", "F", "+",
-            "F", "]", "+", "[", "+", "F", "-",
+        this.grammarString = ["F", "F", "-Z", "[", "-Z", "F", "+Z",
+            "F", "]", "+X", "[", "+Z", "F", "-Z",
             "F", "]"];
         this.axiomString = "F";
         this.currTurtle = 0;
@@ -16787,30 +16791,33 @@ class LSystem {
         this.col3.push(0.0);
         this.col3.push(1.0);
         for (let c in this.grammarString) {
+            let draw = true;
             let func = this.drawRules.get(this.grammarString[c]);
             if (func) {
-                func();
+                draw = func();
             }
-            this.col0.push(this.currTransformMat[0]);
-            this.col0.push(this.currTransformMat[1]);
-            this.col0.push(this.currTransformMat[2]);
-            this.col0.push(this.currTransformMat[3]);
-            this.col1.push(this.currTransformMat[4]);
-            this.col1.push(this.currTransformMat[5]);
-            this.col1.push(this.currTransformMat[6]);
-            this.col1.push(this.currTransformMat[7]);
-            this.col2.push(this.currTransformMat[8]);
-            this.col2.push(this.currTransformMat[9]);
-            this.col2.push(this.currTransformMat[10]);
-            this.col2.push(this.currTransformMat[11]);
-            this.col3.push(this.currTransformMat[12]);
-            this.col3.push(this.currTransformMat[13]);
-            this.col3.push(this.currTransformMat[14]);
-            this.col3.push(this.currTransformMat[15]);
-            this.offsetsArray.push(this.currPos[0]);
-            this.offsetsArray.push(this.currPos[1]);
-            this.offsetsArray.push(this.currPos[2]);
-            this.numCylinders++;
+            if (draw) {
+                this.col0.push(this.currTransformMat[0]);
+                this.col0.push(this.currTransformMat[1]);
+                this.col0.push(this.currTransformMat[2]);
+                this.col0.push(this.currTransformMat[3]);
+                this.col1.push(this.currTransformMat[4]);
+                this.col1.push(this.currTransformMat[5]);
+                this.col1.push(this.currTransformMat[6]);
+                this.col1.push(this.currTransformMat[7]);
+                this.col2.push(this.currTransformMat[8]);
+                this.col2.push(this.currTransformMat[9]);
+                this.col2.push(this.currTransformMat[10]);
+                this.col2.push(this.currTransformMat[11]);
+                this.col3.push(this.currTransformMat[12]);
+                this.col3.push(this.currTransformMat[13]);
+                this.col3.push(this.currTransformMat[14]);
+                this.col3.push(this.currTransformMat[15]);
+                this.offsetsArray.push(this.currPos[0]);
+                this.offsetsArray.push(this.currPos[1]);
+                this.offsetsArray.push(this.currPos[2]);
+                this.numCylinders++;
+            }
         }
         for (let i = 0; i < this.numCylinders; i++) {
             this.colorsArray.push(1.0);
@@ -16825,6 +16832,7 @@ class LSystem {
         this.currDirection = moveForwardRule.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, moveForwardRule.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, moveForwardRule.orientationMat);
+        return true;
     }
     rotateLeftZ() {
         let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 0.0, 1.0);
@@ -16834,6 +16842,7 @@ class LSystem {
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
+        return true;
     }
     rotateRightZ() {
         let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 0.0, 1.0);
@@ -16843,10 +16852,52 @@ class LSystem {
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
+        return true;
+    }
+    rotateLeftX() {
+        let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(1.0, 0.0, 0.0);
+        let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, this.theta, zAxis);
+        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_1__DrawingRule__["a" /* default */](4.0, rotAboutZ);
+        this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
+        return true;
+    }
+    rotateRightX() {
+        let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(1.0, 0.0, 0.0);
+        let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, -this.theta, zAxis);
+        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_1__DrawingRule__["a" /* default */](4.0, rotAboutZ);
+        this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
+        return true;
+    }
+    rotateLeftY() {
+        let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 1.0, 0.0);
+        let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, this.theta, zAxis);
+        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_1__DrawingRule__["a" /* default */](4.0, rotAboutZ);
+        this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
+        return true;
+    }
+    rotateRightY() {
+        let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 1.0, 0.0);
+        let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, -this.theta, zAxis);
+        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_1__DrawingRule__["a" /* default */](4.0, rotAboutZ);
+        this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
+        return true;
     }
     storeTurtle() {
         let newTurtle = new __WEBPACK_IMPORTED_MODULE_2__Turtle__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(this.currPos[0], this.currPos[1], this.currPos[2]), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(this.currDirection[0], this.currDirection[1], this.currDirection[2]), this.currRecursionLevel, this.currTransformMat);
         this.turtleArr.push(newTurtle);
+        return false;
     }
     loadTurtle(posIn, directionIn, transformMat, currRecursionDepth) {
         let currTurtle = this.turtleArr.pop();
@@ -16856,6 +16907,7 @@ class LSystem {
         this.currDirection = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(currTurDir[0], currTurDir[1], currTurDir[2], 1.0);
         this.currTransformMat = currTurtle.transform;
         this.currRecursionLevel = currTurtle.recursionDepth;
+        return false;
     }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = LSystem;
