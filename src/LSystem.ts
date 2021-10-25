@@ -15,6 +15,8 @@ export default class LSystem
     currDirection: vec4;
     currTransformMat: mat4;
 
+    numIterations: number;
+
     theta: number;
 
     // Set up instanced rendering data arrays here.
@@ -33,6 +35,9 @@ export default class LSystem
 
     
     drawRules: Map<string, any>;
+
+    expansionRules: Map<string, ExpansionRule>;
+
 
     constructor()
     {
@@ -53,6 +58,15 @@ export default class LSystem
 
         this.drawRules.set(']', this.loadTurtle.bind(this));
 
+        this.expansionRules = new Map();
+
+        let expandRuleF = new ExpansionRule("F", ["F", "F", "-",
+                                             "[", "-", "F", "+", 
+                                             "F", "]", "+", "[", 
+                                             "+", "F", "-", "F", "]"]);
+        this.expansionRules.set("F", expandRuleF);
+
+
         this.currRecursionLevel = 1;
 
         this.currPos = vec4.fromValues(0.0, 0.0, 0.0, 1.0);
@@ -62,6 +76,8 @@ export default class LSystem
         this.currTransformMat = mat4.create();
 
         this.theta = 3.14159 / 8.0;
+
+        this.numIterations = 3;
 
         let startingTurtle = new Turtle(vec3.fromValues(0.0, 0.0, 0.0), 
                                         vec3.fromValues(0.0, 1.0, 0.0), 
@@ -85,6 +101,33 @@ export default class LSystem
 
         this.numCylinders = 1;
     }
+
+
+    expand()
+    {
+        let outStringArr: string[] = [];
+        let stringArr: string[] = [];
+        for(let i = 0; i < this.numIterations; i++)
+        {
+            for(let c in this.grammarString)
+            {
+                let currRule = this.expansionRules.get(this.grammarString[c]);
+                if(currRule)
+                {
+                    stringArr = currRule.outputString;
+                    for(let s in stringArr)
+                    {
+                        outStringArr.push(stringArr[s]);
+                    }
+                }
+                else
+                outStringArr.push(this.grammarString[c]);
+            }
+        }
+
+        this.grammarString = outStringArr;
+    }
+
 
     // Turn the grammar into position and orientation
     // data for drawing
@@ -118,7 +161,8 @@ export default class LSystem
         for(let c in this.grammarString)
         {
             let draw: boolean = true;
-            let func = this.drawRules.get(this.grammarString[c]);
+            let currString: string = this.grammarString[c];
+            let func = this.drawRules.get(currString);
             if(func)
             {
                draw = func();

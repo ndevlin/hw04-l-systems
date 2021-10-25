@@ -1,8 +1,19 @@
 
 export default class ExpansionRule
 {
-    numExpansions: number;
+    inputLetter: string;
 
+    outputString: string[];
+
+    constructor(inputLetterIn: string, outputStringIn: string[])
+    {
+        this.inputLetter = inputLetterIn;
+        this.outputString = outputStringIn;
+    }
+
+
+    /*
+    numExpansions: number;
     // string is the expansion, number is its probability
     allExpansions: [string, number][];
 
@@ -29,5 +40,6 @@ export default class ExpansionRule
 
         return this.allExpansions[0][0];
     }
+    */
 }
 

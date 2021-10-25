@@ -30,6 +30,8 @@ function loadScene() {
 
   let lSystem: LSystem = new LSystem();
   
+  lSystem.expand();
+
   lSystem.computeDrawingData();
 
   let offsets: Float32Array = new Float32Array(lSystem.offsetsArray);
@@ -72,7 +74,7 @@ function main() {
   // Initial call to load scene
   loadScene();
 
-  const camera = new Camera(vec3.fromValues(0, 0, 50), vec3.fromValues(0, 0, 0));
+  const camera = new Camera(vec3.fromValues(0, 0, 200), vec3.fromValues(0, 0, 0));
 
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.2, 0.2, 0.2, 1);
