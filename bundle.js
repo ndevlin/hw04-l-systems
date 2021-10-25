@@ -16739,17 +16739,20 @@ class LSystem {
     constructor() {
         this.drawRules = new Map();
         this.drawRules.set('F', this.moveForward.bind(this));
-        this.drawRules.set('+', this.rotateLeft.bind(this));
-        this.drawRules.set('-', this.rotateRight.bind(this));
+        this.drawRules.set('+', this.rotateLeftZ.bind(this));
+        this.drawRules.set('-', this.rotateRightZ.bind(this));
         this.drawRules.set('[', this.storeTurtle.bind(this));
         this.drawRules.set(']', this.loadTurtle.bind(this));
         this.currRecursionLevel = 1;
         this.currPos = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.0, 0.0, 0.0, 1.0);
         this.currDirection = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.0, 1.0, 0.0, 0.0);
         this.currTransformMat = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
+        this.theta = 3.14159 / 8.0;
         let startingTurtle = new __WEBPACK_IMPORTED_MODULE_2__Turtle__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 0.0, 0.0), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 1.0, 0.0), 1, __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create());
         this.turtleArr = [startingTurtle];
-        this.grammarString = ["F", "F", "-", "[", "-", "F", "+", "F", "]", "+", "[", "+", "F", "-", "F", "]"];
+        this.grammarString = ["F", "F", "-", "[", "-", "F", "+",
+            "F", "]", "+", "[", "+", "F", "-",
+            "F", "]"];
         this.axiomString = "F";
         this.currTurtle = 0;
         this.offsetsArray = [];
@@ -16763,26 +16766,6 @@ class LSystem {
     // Turn the grammar into position and orientation
     // data for drawing
     computeDrawingData() {
-        /*
-        let rows: number = 1.0;
-        let cols: number = 1.0;
-
-        for(let i = 0; i < rows * cols; i++)
-        {
-            colorsArray.push(i / rows);
-            colorsArray.push(i / cols);
-            colorsArray.push(1.0);
-            colorsArray.push(1.0); // Alpha channel
-        }
-
-        for(let i = 0; i < rows; i++) {
-            for(let j = 0; j < cols; j++) {
-            offsetsArray.push(i * 1.0);
-            offsetsArray.push(j * 1.0);
-            offsetsArray.push(0);
-            }
-        }
-        */
         // Always draw 1 object
         this.offsetsArray.push(0.0);
         this.offsetsArray.push(0.0);
@@ -16804,10 +16787,9 @@ class LSystem {
         this.col3.push(0.0);
         this.col3.push(1.0);
         for (let c in this.grammarString) {
-            let currRecDeptLocal = this.currRecursionLevel;
             let func = this.drawRules.get(this.grammarString[c]);
             if (func) {
-                func(this.currPos, this.currDirection, this.currTransformMat, currRecDeptLocal);
+                func();
             }
             this.col0.push(this.currTransformMat[0]);
             this.col0.push(this.currTransformMat[1]);
@@ -16837,35 +16819,33 @@ class LSystem {
             this.colorsArray.push(1.0); // Alpha channel
         }
     }
-    moveForward(currPos, currDirection, transformMat, currRecursionDepth) {
+    moveForward() {
         let straight = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
         let moveForwardRule = new __WEBPACK_IMPORTED_MODULE_1__DrawingRule__["a" /* default */](4.0, straight);
-        this.currDirection = moveForwardRule.returnNewDirection(currDirection);
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, currPos, this.currDirection, moveForwardRule.forwardAmount);
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(transformMat, transformMat, moveForwardRule.orientationMat);
+        this.currDirection = moveForwardRule.returnNewDirection(this.currDirection);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, moveForwardRule.forwardAmount);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, moveForwardRule.orientationMat);
     }
-    rotateLeft(currPos, currDirection, transformMat, currRecursionDepth) {
+    rotateLeftZ() {
         let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 0.0, 1.0);
-        let theta = 3.14159 / 8.0;
         let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, theta, zAxis);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, this.theta, zAxis);
         let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_1__DrawingRule__["a" /* default */](4.0, rotAboutZ);
-        this.currDirection = rotateAboutZ.returnNewDirection(currDirection);
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, currPos, this.currDirection, rotateAboutZ.forwardAmount);
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, transformMat, rotateAboutZ.orientationMat);
+        this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
     }
-    rotateRight(currPos, currDirection, transformMat, currRecursionDepth) {
+    rotateRightZ() {
         let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 0.0, 1.0);
-        let theta = -3.14159 / 8.0;
         let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, theta, zAxis);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, -this.theta, zAxis);
         let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_1__DrawingRule__["a" /* default */](4.0, rotAboutZ);
-        this.currDirection = rotateAboutZ.returnNewDirection(currDirection);
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, currPos, this.currDirection, rotateAboutZ.forwardAmount);
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, transformMat, rotateAboutZ.orientationMat);
+        this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
     }
-    storeTurtle(posIn, directionIn, transformMat, currRecursionDepth) {
-        let newTurtle = new __WEBPACK_IMPORTED_MODULE_2__Turtle__["a" /* default */](posIn, directionIn, currRecursionDepth, transformMat);
+    storeTurtle() {
+        let newTurtle = new __WEBPACK_IMPORTED_MODULE_2__Turtle__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(this.currPos[0], this.currPos[1], this.currPos[2]), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(this.currDirection[0], this.currDirection[1], this.currDirection[2]), this.currRecursionLevel, this.currTransformMat);
         this.turtleArr.push(newTurtle);
     }
     loadTurtle(posIn, directionIn, transformMat, currRecursionDepth) {
