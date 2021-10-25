@@ -16735,8 +16735,11 @@ class Cube extends __WEBPACK_IMPORTED_MODULE_1__rendering_gl_Drawable__["a" /* d
 
 class LSystem {
     constructor() {
+        this.drawRules = new Map();
+        this.drawRules.set('F', this.moveForward);
+        this.drawRules.set('+', this.rotateLeft);
         this.turtleArr = [];
-        this.grammarString = ["F", "G", "F", "G", "G", "F"];
+        this.grammarString = ["F", "+", "F", "+", "+", "F"];
         this.axiomString = "F";
         this.currTurtle = 0;
         this.offsetsArray = [];
@@ -16792,25 +16795,11 @@ class LSystem {
         this.col3.push(1.0);
         let currPos = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.0, 0.0, 0.0, 1.0);
         let currDirection = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.0, 1.0, 0.0, 0.0);
-        let straight = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
-        let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 0.0, 1.0);
-        let theta = 3.14159 / 8.0;
-        let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, theta, zAxis);
-        let drawF = new __WEBPACK_IMPORTED_MODULE_1__DrawingRule__["a" /* default */](4.0, straight);
-        let drawG = new __WEBPACK_IMPORTED_MODULE_1__DrawingRule__["a" /* default */](4.0, rotAboutZ);
         let transformMat = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
         for (let c in this.grammarString) {
-            if (this.grammarString[c] == "F") {
-                // Change currDirection
-                currDirection = drawF.returnNewDirection(currDirection);
-                __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(currPos, currPos, currDirection, drawF.forwardAmount);
-                __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(transformMat, transformMat, drawF.orientationMat);
-            }
-            else if (this.grammarString[c] == "G") {
-                currDirection = drawG.returnNewDirection(currDirection);
-                __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(currPos, currPos, currDirection, drawG.forwardAmount);
-                __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(transformMat, transformMat, drawG.orientationMat);
+            let func = this.drawRules.get(this.grammarString[c]);
+            if (func) {
+                currDirection = func(currPos, currDirection, transformMat);
             }
             this.col0.push(transformMat[0]);
             this.col0.push(transformMat[1]);
@@ -16839,6 +16828,25 @@ class LSystem {
             this.colorsArray.push(0.0);
             this.colorsArray.push(1.0); // Alpha channel
         }
+    }
+    moveForward(currPos, currDirection, transformMat) {
+        let straight = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
+        let moveForwardRule = new __WEBPACK_IMPORTED_MODULE_1__DrawingRule__["a" /* default */](4.0, straight);
+        currDirection = moveForwardRule.returnNewDirection(currDirection);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(currPos, currPos, currDirection, moveForwardRule.forwardAmount);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(transformMat, transformMat, moveForwardRule.orientationMat);
+        return currDirection;
+    }
+    rotateLeft(currPos, currDirection, transformMat) {
+        let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 0.0, 1.0);
+        let theta = 3.14159 / 8.0;
+        let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, theta, zAxis);
+        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_1__DrawingRule__["a" /* default */](4.0, rotAboutZ);
+        currDirection = rotateAboutZ.returnNewDirection(currDirection);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(currPos, currPos, currDirection, rotateAboutZ.forwardAmount);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(transformMat, transformMat, rotateAboutZ.orientationMat);
+        return currDirection;
     }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = LSystem;
