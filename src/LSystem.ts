@@ -11,6 +11,10 @@ export default class LSystem
     axiomString: string;
     currTurtle: number;
 
+    currPos: vec4;
+    currDirection: vec4;
+    currTransformMat: mat4;
+
      // Set up instanced rendering data arrays here.
      offsetsArray: number[];
      colorsArray: number[];
@@ -23,17 +27,39 @@ export default class LSystem
 
     numCylinders: number;
 
+    currRecursionLevel: number;
+
     
     drawRules: Map<string, any>;
 
     constructor()
     {
         this.drawRules = new Map();
-        this.drawRules.set('F', this.moveForward);
-        this.drawRules.set('+', this.rotateLeft);
+        this.drawRules.set('F', this.moveForward.bind(this));
+        this.drawRules.set('+', this.rotateLeft.bind(this));
+        
+        this.drawRules.set('-', this.rotateRight.bind(this));
 
-        this.turtleArr = [];
-        this.grammarString = ["F", "+", "F", "+", "+", "F"];
+
+        this.drawRules.set('[', this.storeTurtle.bind(this));
+
+        this.drawRules.set(']', this.loadTurtle.bind(this));
+
+        this.currRecursionLevel = 1;
+
+        this.currPos = vec4.fromValues(0.0, 0.0, 0.0, 1.0);
+
+        this.currDirection = vec4.fromValues(0.0, 1.0, 0.0, 0.0);
+    
+        this.currTransformMat = mat4.create();
+
+        let startingTurtle = new Turtle(vec3.fromValues(0.0, 0.0, 0.0), 
+                                        vec3.fromValues(0.0, 1.0, 0.0), 
+                                        1,
+                                        mat4.create());
+
+        this.turtleArr = [startingTurtle];
+        this.grammarString = ["F", "F", "-", "[", "-", "F", "+", "F", "]", "+", "[", "+", "F", "-", "F", "]"];
         this.axiomString = "F";
         this.currTurtle = 0;
 
@@ -46,9 +72,7 @@ export default class LSystem
         this.col3 = [];
 
         this.numCylinders = 1;
-
     }
-
 
     // Turn the grammar into position and orientation
     // data for drawing
@@ -74,6 +98,7 @@ export default class LSystem
             }
         }
         */        
+
         // Always draw 1 object
         this.offsetsArray.push(0.0);
         this.offsetsArray.push(0.0);
@@ -99,45 +124,39 @@ export default class LSystem
         this.col3.push(0.0);
         this.col3.push(1.0);
 
-        let currPos: vec4 = vec4.fromValues(0.0, 0.0, 0.0, 1.0);
-
-        let currDirection: vec4 = vec4.fromValues(0.0, 1.0, 0.0, 0.0);
-
-        let transformMat: mat4 = mat4.create();
-
         for(let c in this.grammarString)
         {
+
+            let currRecDeptLocal = this.currRecursionLevel;
             let func = this.drawRules.get(this.grammarString[c]);
             if(func)
             {
-               currDirection = func(currPos, currDirection, transformMat);
+               func(this.currPos, this.currDirection, this.currTransformMat, currRecDeptLocal);
             }
 
-            this.col0.push(transformMat[0]);
-            this.col0.push(transformMat[1]);
-            this.col0.push(transformMat[2]);
-            this.col0.push(transformMat[3]);
+            this.col0.push(this.currTransformMat[0]);
+            this.col0.push(this.currTransformMat[1]);
+            this.col0.push(this.currTransformMat[2]);
+            this.col0.push(this.currTransformMat[3]);
 
-            this.col1.push(transformMat[4]);
-            this.col1.push(transformMat[5]);
-            this.col1.push(transformMat[6]);
-            this.col1.push(transformMat[7]);
+            this.col1.push(this.currTransformMat[4]);
+            this.col1.push(this.currTransformMat[5]);
+            this.col1.push(this.currTransformMat[6]);
+            this.col1.push(this.currTransformMat[7]);
 
-            this.col2.push(transformMat[8]);
-            this.col2.push(transformMat[9]);
-            this.col2.push(transformMat[10]);
-            this.col2.push(transformMat[11]);
+            this.col2.push(this.currTransformMat[8]);
+            this.col2.push(this.currTransformMat[9]);
+            this.col2.push(this.currTransformMat[10]);
+            this.col2.push(this.currTransformMat[11]);
 
-            this.col3.push(transformMat[12]);
-            this.col3.push(transformMat[13]);
-            this.col3.push(transformMat[14]);
-            this.col3.push(transformMat[15]);
+            this.col3.push(this.currTransformMat[12]);
+            this.col3.push(this.currTransformMat[13]);
+            this.col3.push(this.currTransformMat[14]);
+            this.col3.push(this.currTransformMat[15]);
 
-
-
-            this.offsetsArray.push(currPos[0]);
-            this.offsetsArray.push(currPos[1]);
-            this.offsetsArray.push(currPos[2]);
+            this.offsetsArray.push(this.currPos[0]);
+            this.offsetsArray.push(this.currPos[1]);
+            this.offsetsArray.push(this.currPos[2]);
             this.numCylinders++;
         }
         
@@ -151,27 +170,62 @@ export default class LSystem
         }
     }
 
-    moveForward(currPos: vec4, currDirection: vec4, transformMat: mat4): vec4
+    moveForward(currPos: vec4, currDirection: vec4, 
+                transformMat: mat4, currRecursionDepth: number): void
     {
         let straight: mat4 = mat4.create();
         let moveForwardRule = new DrawingRule(4.0, straight);
-        currDirection = moveForwardRule.returnNewDirection(currDirection);
-        vec4.scaleAndAdd(currPos, currPos, currDirection, moveForwardRule.forwardAmount);
+        this.currDirection = moveForwardRule.returnNewDirection(currDirection);
+        vec4.scaleAndAdd(this.currPos, currPos, this.currDirection, moveForwardRule.forwardAmount);
         mat4.mul(transformMat, transformMat, moveForwardRule.orientationMat);
-        return currDirection;
     }
 
-    rotateLeft(currPos: vec4, currDirection: vec4, transformMat: mat4): vec4
+    rotateLeft(currPos: vec4, currDirection: vec4, 
+                transformMat: mat4, currRecursionDepth: number): void
     {
         let zAxis: vec3 = vec3.fromValues(0.0, 0.0, 1.0);
         let theta: number = 3.14159 / 8.0;
         let rotAboutZ = mat4.create();
         mat4.fromRotation(rotAboutZ, theta, zAxis);
         let rotateAboutZ = new DrawingRule(4.0, rotAboutZ);
-        currDirection = rotateAboutZ.returnNewDirection(currDirection);
-        vec4.scaleAndAdd(currPos, currPos, currDirection, rotateAboutZ.forwardAmount);
-        mat4.mul(transformMat, transformMat, rotateAboutZ.orientationMat);
-        return currDirection;
+        this.currDirection = rotateAboutZ.returnNewDirection(currDirection);
+        vec4.scaleAndAdd(this.currPos, currPos, this.currDirection, rotateAboutZ.forwardAmount);
+        mat4.mul(this.currTransformMat, transformMat, rotateAboutZ.orientationMat);
+    }
+
+    rotateRight(currPos: vec4, currDirection: vec4, 
+        transformMat: mat4, currRecursionDepth: number): void
+    {
+    let zAxis: vec3 = vec3.fromValues(0.0, 0.0, 1.0);
+    let theta: number = -3.14159 / 8.0;
+    let rotAboutZ = mat4.create();
+    mat4.fromRotation(rotAboutZ, theta, zAxis);
+    let rotateAboutZ = new DrawingRule(4.0, rotAboutZ);
+    this.currDirection = rotateAboutZ.returnNewDirection(currDirection);
+    vec4.scaleAndAdd(this.currPos, currPos, this.currDirection, rotateAboutZ.forwardAmount);
+    mat4.mul(this.currTransformMat, transformMat, rotateAboutZ.orientationMat);
+    }
+
+
+    storeTurtle(posIn: vec3, directionIn: vec3, 
+                transformMat: mat4, currRecursionDepth: number): void
+    {
+        let newTurtle: Turtle = new Turtle(posIn, directionIn, currRecursionDepth, transformMat);
+        this.turtleArr.push(newTurtle);
+    }
+
+    loadTurtle(posIn: vec3, directionIn: vec3, 
+        transformMat: mat4, currRecursionDepth: number): void
+    {
+        let currTurtle: Turtle = this.turtleArr.pop();
+        let currTurPos: vec3 = currTurtle.position;
+        this.currPos = vec4.fromValues(currTurPos[0], currTurPos[1], currTurPos[2], 1.0);
+        let currTurDir: vec3 = currTurtle.orientation;
+        this.currDirection = vec4.fromValues(currTurDir[0], currTurDir[1], currTurDir[2], 1.0);
+    
+        this.currTransformMat = currTurtle.transform;
+        this.currRecursionLevel = currTurtle.recursionDepth;
     }
 
 }
+
