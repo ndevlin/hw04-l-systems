@@ -6083,6 +6083,7 @@ function loadScene() {
     screenQuad = new __WEBPACK_IMPORTED_MODULE_4__geometry_ScreenQuad__["a" /* default */]();
     screenQuad.create();
     let lSystem = new __WEBPACK_IMPORTED_MODULE_10__LSystem__["a" /* default */]();
+    lSystem.expand();
     lSystem.computeDrawingData();
     let offsets = new Float32Array(lSystem.offsetsArray);
     let colors = new Float32Array(lSystem.colorsArray);
@@ -6116,18 +6117,18 @@ function main() {
     Object(__WEBPACK_IMPORTED_MODULE_7__globals__["b" /* setGL */])(gl);
     // Initial call to load scene
     loadScene();
-    const camera = new __WEBPACK_IMPORTED_MODULE_6__Camera__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0, 0, 50), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0, 0, 0));
+    const camera = new __WEBPACK_IMPORTED_MODULE_6__Camera__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0, 0, 200), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0, 0, 0));
     const renderer = new __WEBPACK_IMPORTED_MODULE_5__rendering_gl_OpenGLRenderer__["a" /* default */](canvas);
     renderer.setClearColor(0.2, 0.2, 0.2, 1);
     //gl.enable(gl.BLEND);
     //gl.blendFunc(gl.ONE, gl.ONE); // Additive blending
     const instancedShader = new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["b" /* default */]([
-        new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["a" /* Shader */](gl.VERTEX_SHADER, __webpack_require__(73)),
-        new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["a" /* Shader */](gl.FRAGMENT_SHADER, __webpack_require__(74)),
+        new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["a" /* Shader */](gl.VERTEX_SHADER, __webpack_require__(74)),
+        new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["a" /* Shader */](gl.FRAGMENT_SHADER, __webpack_require__(75)),
     ]);
     const flat = new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["b" /* default */]([
-        new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["a" /* Shader */](gl.VERTEX_SHADER, __webpack_require__(75)),
-        new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["a" /* Shader */](gl.FRAGMENT_SHADER, __webpack_require__(76)),
+        new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["a" /* Shader */](gl.VERTEX_SHADER, __webpack_require__(76)),
+        new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["a" /* Shader */](gl.FRAGMENT_SHADER, __webpack_require__(77)),
     ]);
     // This function will be called every frame
     function tick() {
@@ -16730,8 +16731,10 @@ class Cube extends __WEBPACK_IMPORTED_MODULE_1__rendering_gl_Drawable__["a" /* d
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_gl_matrix__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__DrawingRule__ = __webpack_require__(71);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Turtle__ = __webpack_require__(72);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__ExpansionRule__ = __webpack_require__(71);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__DrawingRule__ = __webpack_require__(72);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__Turtle__ = __webpack_require__(73);
+
 
 
 
@@ -16747,12 +16750,19 @@ class LSystem {
         this.drawRules.set('-Y', this.rotateRightY.bind(this));
         this.drawRules.set('[', this.storeTurtle.bind(this));
         this.drawRules.set(']', this.loadTurtle.bind(this));
+        this.expansionRules = new Map();
+        let expandRuleF = new __WEBPACK_IMPORTED_MODULE_1__ExpansionRule__["a" /* default */]("F", ["F", "F", "-",
+            "[", "-", "F", "+",
+            "F", "]", "+", "[",
+            "+", "F", "-", "F", "]"]);
+        this.expansionRules.set("F", expandRuleF);
         this.currRecursionLevel = 1;
         this.currPos = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.0, 0.0, 0.0, 1.0);
         this.currDirection = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.0, 1.0, 0.0, 0.0);
         this.currTransformMat = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
         this.theta = 3.14159 / 8.0;
-        let startingTurtle = new __WEBPACK_IMPORTED_MODULE_2__Turtle__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 0.0, 0.0), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 1.0, 0.0), 1, __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create());
+        this.numIterations = 3;
+        let startingTurtle = new __WEBPACK_IMPORTED_MODULE_3__Turtle__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 0.0, 0.0), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 1.0, 0.0), 1, __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create());
         this.turtleArr = [startingTurtle];
         this.grammarString = ["F", "F", "-Z", "[", "-Z", "F", "+Z",
             "F", "]", "+X", "[", "+Z", "F", "-Z",
@@ -16766,6 +16776,24 @@ class LSystem {
         this.col2 = [];
         this.col3 = [];
         this.numCylinders = 1;
+    }
+    expand() {
+        let outStringArr = [];
+        let stringArr = [];
+        for (let i = 0; i < this.numIterations; i++) {
+            for (let c in this.grammarString) {
+                let currRule = this.expansionRules.get(this.grammarString[c]);
+                if (currRule) {
+                    stringArr = currRule.outputString;
+                    for (let s in stringArr) {
+                        outStringArr.push(stringArr[s]);
+                    }
+                }
+                else
+                    outStringArr.push(this.grammarString[c]);
+            }
+        }
+        this.grammarString = outStringArr;
     }
     // Turn the grammar into position and orientation
     // data for drawing
@@ -16792,7 +16820,8 @@ class LSystem {
         this.col3.push(1.0);
         for (let c in this.grammarString) {
             let draw = true;
-            let func = this.drawRules.get(this.grammarString[c]);
+            let currString = this.grammarString[c];
+            let func = this.drawRules.get(currString);
             if (func) {
                 draw = func();
             }
@@ -16828,7 +16857,7 @@ class LSystem {
     }
     moveForward() {
         let straight = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
-        let moveForwardRule = new __WEBPACK_IMPORTED_MODULE_1__DrawingRule__["a" /* default */](4.0, straight);
+        let moveForwardRule = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](4.0, straight);
         this.currDirection = moveForwardRule.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, moveForwardRule.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, moveForwardRule.orientationMat);
@@ -16838,7 +16867,7 @@ class LSystem {
         let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 0.0, 1.0);
         let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, this.theta, zAxis);
-        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_1__DrawingRule__["a" /* default */](4.0, rotAboutZ);
+        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](4.0, rotAboutZ);
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
@@ -16848,7 +16877,7 @@ class LSystem {
         let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 0.0, 1.0);
         let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, -this.theta, zAxis);
-        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_1__DrawingRule__["a" /* default */](4.0, rotAboutZ);
+        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](4.0, rotAboutZ);
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
@@ -16858,7 +16887,7 @@ class LSystem {
         let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(1.0, 0.0, 0.0);
         let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, this.theta, zAxis);
-        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_1__DrawingRule__["a" /* default */](4.0, rotAboutZ);
+        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](4.0, rotAboutZ);
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
@@ -16868,7 +16897,7 @@ class LSystem {
         let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(1.0, 0.0, 0.0);
         let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, -this.theta, zAxis);
-        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_1__DrawingRule__["a" /* default */](4.0, rotAboutZ);
+        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](4.0, rotAboutZ);
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
@@ -16878,7 +16907,7 @@ class LSystem {
         let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 1.0, 0.0);
         let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, this.theta, zAxis);
-        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_1__DrawingRule__["a" /* default */](4.0, rotAboutZ);
+        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](4.0, rotAboutZ);
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
@@ -16888,14 +16917,14 @@ class LSystem {
         let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 1.0, 0.0);
         let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, -this.theta, zAxis);
-        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_1__DrawingRule__["a" /* default */](4.0, rotAboutZ);
+        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](4.0, rotAboutZ);
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
         return true;
     }
     storeTurtle() {
-        let newTurtle = new __WEBPACK_IMPORTED_MODULE_2__Turtle__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(this.currPos[0], this.currPos[1], this.currPos[2]), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(this.currDirection[0], this.currDirection[1], this.currDirection[2]), this.currRecursionLevel, this.currTransformMat);
+        let newTurtle = new __WEBPACK_IMPORTED_MODULE_3__Turtle__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(this.currPos[0], this.currPos[1], this.currPos[2]), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(this.currDirection[0], this.currDirection[1], this.currDirection[2]), this.currRecursionLevel, this.currTransformMat);
         this.turtleArr.push(newTurtle);
         return false;
     }
@@ -16919,6 +16948,21 @@ class LSystem {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+class ExpansionRule {
+    constructor(inputLetterIn, outputStringIn) {
+        this.inputLetter = inputLetterIn;
+        this.outputString = outputStringIn;
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = ExpansionRule;
+
+
+
+/***/ }),
+/* 72 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_gl_matrix__ = __webpack_require__(1);
 
 class DrawingRule {
@@ -16937,7 +16981,7 @@ class DrawingRule {
 
 
 /***/ }),
-/* 72 */
+/* 73 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -16959,25 +17003,25 @@ class Turtle {
 
 
 /***/ }),
-/* 73 */
+/* 74 */
 /***/ (function(module, exports) {
 
 module.exports = "#version 300 es\n\nuniform mat4 u_ViewProj;\nuniform float u_Time;\n\nuniform mat3 u_CameraAxes; // Used for rendering particles as billboards (quads that are always looking at the camera)\n// gl_Position = center + vs_Pos.x * camRight + vs_Pos.y * camUp;\n\nin vec4 vs_Pos; // Non-instanced; each particle is the same quad drawn in a different place\nin vec4 vs_Nor; // Non-instanced, and presently unused\nin vec4 vs_Col; // An instanced rendering attribute; each particle instance has a different color\nin vec3 vs_Translate; // Another instance rendering attribute used to position each quad instance in the scene\nin vec2 vs_UV; // Non-instanced, and presently unused in main(). Feel free to use it for your meshes.\n\n// The transformation matrix in the form of 4 vec4s\nin vec4 vs_matCol0;\nin vec4 vs_matCol1;\nin vec4 vs_matCol2;\nin vec4 vs_matCol3;\n\nout vec4 fs_matCol0;\nout vec4 fs_matCol1;\nout vec4 fs_matCol2;\nout vec4 fs_matCol3;\n\nout vec4 fs_Col;\nout vec4 fs_Pos;\n\nout vec4 fs_Nor;\n\nvoid main()\n{\n    fs_Col = vs_Col;\n    fs_Pos = vs_Pos;\n\n    fs_Nor = vs_Nor;\n\n    fs_matCol0 = vs_matCol0;\n    fs_matCol1 = vs_matCol1;\n    fs_matCol2 = vs_matCol2;\n    fs_matCol3 = vs_matCol3;\n\n\n\n    vec3 offset = vs_Translate;\n\n\n    mat4 transformMat = mat4(vs_matCol0,\n                            vs_matCol1,\n                            vs_matCol2,\n                            vs_matCol3);\n\n\n    vec4 newPos = vec4(vec3(transformMat * vs_Pos) + offset, 1.0);\n\n    gl_Position = u_ViewProj * newPos;\n\n    //offset.z = (sin((u_Time + offset.x) * 3.14159 * 0.1) + cos((u_Time + offset.y) * 3.14159 * 0.1)) * 1.5;\n    //vec3 billboardPos = offset + vs_Pos.x * u_CameraAxes[0] + vs_Pos.y * u_CameraAxes[1];\n    //gl_Position = u_ViewProj * vec4(billboardPos, 1.0);\n}\n"
 
 /***/ }),
-/* 74 */
+/* 75 */
 /***/ (function(module, exports) {
 
 module.exports = "#version 300 es\nprecision highp float;\n\nin vec4 fs_Col;\nin vec4 fs_Pos;\n\nin vec4 fs_Nor;\n\nin vec4 fs_matCol0;\nin vec4 fs_matCol1;\nin vec4 fs_matCol2;\nin vec4 fs_matCol3;\n\nout vec4 out_Col;\n\nvoid main()\n{\n    //float dist = 1.0 - (length(fs_Pos.xyz) * 2.0);\n    //out_Col = vec4(dist) * fs_Col;\n\n    //out_Col = fs_Col;\n\n    out_Col = vec4(0.4588, 0.2353, 0.1333, 1.0);\n\n    //out_Col = vec4(vec3(fs_matCol0), 1.0);\n}\n"
 
 /***/ }),
-/* 75 */
+/* 76 */
 /***/ (function(module, exports) {
 
 module.exports = "#version 300 es\nprecision highp float;\n\n// The vertex shader used to render the background of the scene\n\nin vec4 vs_Pos;\nout vec2 fs_Pos;\n\nvoid main() {\n  fs_Pos = vs_Pos.xy;\n  gl_Position = vs_Pos;\n}\n"
 
 /***/ }),
-/* 76 */
+/* 77 */
 /***/ (function(module, exports) {
 
 module.exports = "#version 300 es\nprecision highp float;\n\nuniform vec3 u_Eye, u_Ref, u_Up;\nuniform vec2 u_Dimensions;\nuniform float u_Time;\n\nin vec2 fs_Pos;\nout vec4 out_Col;\n\nvoid main() \n{\n  //out_Col = vec4(0.5 * (fs_Pos + vec2(1.0)), 0.0, 1.0);\n\n  out_Col = vec4(0.0, 0.0, 0.0, 1.0);\n}\n"
