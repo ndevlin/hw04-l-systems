@@ -39,7 +39,7 @@ export default class LSystem
     expansionRules: Map<string, ExpansionRule>;
 
 
-    constructor()
+    constructor(angle: number)
     {
         this.drawRules = new Map();
         this.drawRules.set('F', this.moveForward.bind(this));
@@ -75,7 +75,7 @@ export default class LSystem
     
         this.currTransformMat = mat4.create();
 
-        this.theta = 3.14159 / 8.0;
+        this.theta = angle;
 
         this.numIterations = 3;
 

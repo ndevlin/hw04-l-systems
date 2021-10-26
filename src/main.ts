@@ -10,15 +10,24 @@ import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 import Cube from './geometry/Cube';
 import LSystem from './LSystem';
 
+
+const PI = 3.14159;
+
+let angle: number = PI / 8.9;
+let prevAngle = angle;
+
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
-const controls = {
+const controls = 
+{
+  Angle: PI / 8.0
 };
 
 let square: Square;
 let cube: Cube;
 let screenQuad: ScreenQuad;
 let time: number = 0.0;
+
 
 function loadScene() {
   square = new Square();
@@ -28,7 +37,7 @@ function loadScene() {
   screenQuad = new ScreenQuad();
   screenQuad.create();
 
-  let lSystem: LSystem = new LSystem();
+  let lSystem: LSystem = new LSystem(angle);
   
   lSystem.expand();
 
@@ -60,6 +69,8 @@ function main() {
 
   // Add controls to the gui
   const gui = new DAT.GUI();
+
+  gui.add(controls, "Angle", -PI, PI).step(0.1);
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -93,6 +104,15 @@ function main() {
 
   // This function will be called every frame
   function tick() {
+
+    angle = controls.Angle;
+
+    if(angle != prevAngle)
+    {
+      prevAngle = angle;
+      loadScene();
+    }
+
     camera.update();
     stats.begin();
     instancedShader.setTime(time);
