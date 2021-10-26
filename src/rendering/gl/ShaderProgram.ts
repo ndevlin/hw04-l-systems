@@ -165,7 +165,7 @@ class ShaderProgram {
       gl.vertexAttribDivisor(this.attrCol, 1); // Advance 1 index in col VBO for each drawn instance
     }
 
-
+    // Set up attribute data for transformation matrix for instanced rendering data
 
     if (this.attrMatCol0 != -1 && d.bindMatCol0()) {
       gl.enableVertexAttribArray(this.attrMatCol0);
@@ -203,8 +203,6 @@ class ShaderProgram {
       gl.vertexAttribPointer(this.attrUV, 2, gl.FLOAT, false, 0, 0);
       gl.vertexAttribDivisor(this.attrUV, 0); // Advance 1 index in pos VBO for each vertex
     }
-
-    // TODO: Set up attribute data for additional instanced rendering data as needed
 
     d.bindIdx();
     // drawElementsInstanced uses the vertexAttribDivisor for each "in" variable to
