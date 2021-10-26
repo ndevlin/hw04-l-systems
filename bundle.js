@@ -6068,9 +6068,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
+const PI = 3.14159;
+let angle = PI / 8.9;
+let prevAngle = angle;
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
-const controls = {};
+const controls = {
+    Angle: PI / 8.0
+};
 let square;
 let cube;
 let screenQuad;
@@ -6082,7 +6087,7 @@ function loadScene() {
     cube.create();
     screenQuad = new __WEBPACK_IMPORTED_MODULE_4__geometry_ScreenQuad__["a" /* default */]();
     screenQuad.create();
-    let lSystem = new __WEBPACK_IMPORTED_MODULE_10__LSystem__["a" /* default */]();
+    let lSystem = new __WEBPACK_IMPORTED_MODULE_10__LSystem__["a" /* default */](angle);
     lSystem.expand();
     lSystem.computeDrawingData();
     let offsets = new Float32Array(lSystem.offsetsArray);
@@ -6106,6 +6111,7 @@ function main() {
     document.body.appendChild(stats.domElement);
     // Add controls to the gui
     const gui = new __WEBPACK_IMPORTED_MODULE_2_dat_gui__["GUI"]();
+    gui.add(controls, "Angle", -PI, PI).step(0.1);
     // get canvas and webgl context
     const canvas = document.getElementById('canvas');
     const gl = canvas.getContext('webgl2');
@@ -6132,6 +6138,11 @@ function main() {
     ]);
     // This function will be called every frame
     function tick() {
+        angle = controls.Angle;
+        if (angle != prevAngle) {
+            prevAngle = angle;
+            loadScene();
+        }
         camera.update();
         stats.begin();
         instancedShader.setTime(time);
@@ -16740,7 +16751,7 @@ class Cube extends __WEBPACK_IMPORTED_MODULE_1__rendering_gl_Drawable__["a" /* d
 
 
 class LSystem {
-    constructor() {
+    constructor(angle) {
         this.drawRules = new Map();
         this.drawRules.set('F', this.moveForward.bind(this));
         this.drawRules.set('+Z', this.rotateLeftZ.bind(this));
@@ -16761,7 +16772,7 @@ class LSystem {
         this.currPos = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.0, 0.0, 0.0, 1.0);
         this.currDirection = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.0, 1.0, 0.0, 0.0);
         this.currTransformMat = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
-        this.theta = 3.14159 / 8.0;
+        this.theta = angle;
         this.numIterations = 3;
         let startingTurtle = new __WEBPACK_IMPORTED_MODULE_3__Turtle__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 0.0, 0.0), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 1.0, 0.0), 1, __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create());
         this.turtleArr = [startingTurtle];
