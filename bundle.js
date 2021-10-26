@@ -16924,6 +16924,11 @@ class LSystem {
         return true;
     }
     storeTurtle() {
+        this.currRecursionLevel++;
+        let scaleFactor = 1.0 - (this.currRecursionLevel / 100.0);
+        this.currTransformMat[0] *= scaleFactor;
+        this.currTransformMat[5] *= scaleFactor;
+        this.currTransformMat[10] *= scaleFactor;
         let newTurtle = new __WEBPACK_IMPORTED_MODULE_3__Turtle__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(this.currPos[0], this.currPos[1], this.currPos[2]), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(this.currDirection[0], this.currDirection[1], this.currDirection[2]), this.currRecursionLevel, this.currTransformMat);
         this.turtleArr.push(newTurtle);
         return false;
