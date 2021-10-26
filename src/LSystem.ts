@@ -294,6 +294,15 @@ export default class LSystem
 
     storeTurtle(): boolean
     {
+        this.currRecursionLevel++;
+        let scaleFactor: number = 1.0 - (this.currRecursionLevel / 100.0);
+
+        
+        this.currTransformMat[0] *= scaleFactor;
+        this.currTransformMat[5] *= scaleFactor;
+        this.currTransformMat[10] *= scaleFactor;
+        
+        
         let newTurtle: Turtle = new Turtle(vec3.fromValues(this.currPos[0], this.currPos[1], this.currPos[2]), 
                                             vec3.fromValues(this.currDirection[0], this.currDirection[1], this.currDirection[2]), 
                                                 this.currRecursionLevel, this.currTransformMat);
