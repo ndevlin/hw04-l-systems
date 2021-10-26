@@ -13266,6 +13266,7 @@ class OpenGLRenderer {
         prog.setModelMatrix(model);
         prog.setViewProjMatrix(viewProj);
         prog.setCameraAxes(axes);
+        prog.setDimensions(this.canvas.width, this.canvas.height);
         for (let drawable of drawables) {
             prog.draw(drawable);
         }
@@ -16524,6 +16525,7 @@ class ShaderProgram {
             __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].vertexAttribPointer(this.attrCol, 4, __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].FLOAT, false, 0, 0);
             __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].vertexAttribDivisor(this.attrCol, 1); // Advance 1 index in col VBO for each drawn instance
         }
+        // Set up attribute data for transformation matrix for instanced rendering data
         if (this.attrMatCol0 != -1 && d.bindMatCol0()) {
             __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].enableVertexAttribArray(this.attrMatCol0);
             __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].vertexAttribPointer(this.attrMatCol0, 4, __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].FLOAT, false, 0, 0);
@@ -16554,7 +16556,6 @@ class ShaderProgram {
             __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].vertexAttribPointer(this.attrUV, 2, __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].FLOAT, false, 0, 0);
             __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].vertexAttribDivisor(this.attrUV, 0); // Advance 1 index in pos VBO for each vertex
         }
-        // TODO: Set up attribute data for additional instanced rendering data as needed
         d.bindIdx();
         // drawElementsInstanced uses the vertexAttribDivisor for each "in" variable to
         // determine how to link it to each drawn instance of the bound VBO.
@@ -17029,7 +17030,7 @@ module.exports = "#version 300 es\nprecision highp float;\n\n// The vertex shade
 /* 77 */
 /***/ (function(module, exports) {
 
-module.exports = "#version 300 es\nprecision highp float;\n\nuniform vec3 u_Eye, u_Ref, u_Up;\nuniform vec2 u_Dimensions;\nuniform float u_Time;\n\nin vec2 fs_Pos;\nout vec4 out_Col;\n\nvoid main() \n{\n  //out_Col = vec4(0.5 * (fs_Pos + vec2(1.0)), 0.0, 1.0);\n\n  out_Col = vec4(0.0, 0.0, 0.0, 1.0);\n}\n"
+module.exports = "#version 300 es\nprecision highp float;\n\nuniform vec3 u_Eye, u_Ref, u_Up;\nuniform vec2 u_Dimensions;\nuniform float u_Time;\n\nin vec2 fs_Pos;\nout vec4 out_Col;\n\n// Takes in a position vec3, returns a vec3, to be used below as a color\nvec3 noise3D( vec3 p ) \n{\n    float val1 = fract(sin((dot(p, vec3(127.1, 311.7, 191.999)))) * 4.5453);\n\n    float val2 = fract(sin((dot(p, vec3(191.999, 127.1, 311.7)))) * 3.5453);\n\n    float val3 = fract(sin((dot(p, vec3(311.7, 191.999, 127.1)))) * 7.5453);\n\n    return vec3(val1, val2, val3);\n}\n\n// Interpolate in 3 dimensions\nvec3 interpNoise3D(float x, float y, float z) \n{\n    int intX = int(floor(x));\n    float fractX = fract(x);\n    int intY = int(floor(y));\n    float fractY = fract(y);\n    int intZ = int(floor(z));\n    float fractZ = fract(z);\n\n    vec3 v1 = noise3D(vec3(intX, intY, intZ));\n    vec3 v2 = noise3D(vec3(intX + 1, intY, intZ));\n    vec3 v3 = noise3D(vec3(intX, intY + 1, intZ));\n    vec3 v4 = noise3D(vec3(intX + 1, intY + 1, intZ));\n\n    vec3 v5 = noise3D(vec3(intX, intY, intZ + 1));\n    vec3 v6 = noise3D(vec3(intX + 1, intY, intZ + 1));\n    vec3 v7 = noise3D(vec3(intX, intY + 1, intZ + 1));\n    vec3 v8 = noise3D(vec3(intX + 1, intY + 1, intZ + 1));\n\n    vec3 i1 = mix(v1, v2, fractX);\n    vec3 i2 = mix(v3, v4, fractX);\n\n    vec3 i3 = mix(i1, i2, fractY);\n\n    vec3 i4 = mix(v5, v6, fractX);\n    vec3 i5 = mix(v7, v8, fractX);\n\n    vec3 i6 = mix(i4, i5, fractY);\n\n    vec3 i7 = mix(i3, i6, fractZ);\n\n    return i7;\n}\n\n// 3D Fractal Brownian Motion\nvec3 fbm(float x, float y, float z, int octaves) \n{\n    vec3 total = vec3(0.f, 0.f, 0.f);\n\n    float persistence = 0.5f;\n\n    for(int i = 1; i <= octaves; i++) \n    {\n        float freq = pow(3.f, float(i));\n        float amp = pow(persistence, float(i));\n\n        total += interpNoise3D(x * freq, y * freq, z * freq) * amp;\n    }\n    \n    return total;\n}\n\n\nvoid main() \n{\n  //out_Col = vec4(0.5 * (fs_Pos + vec2(1.0)), 0.0, 1.0);\n\n  //out_Col = vec4(0.0, 0.0, 0.0, 1.0);\n\n  vec3 fbmOut = fbm(fs_Pos.x, fs_Pos.y, 0.0, 12);\n  float greyScale = fbmOut.x / fbmOut.y * fbmOut.z;\n\n  greyScale = pow(greyScale, 0.75);\n\n  out_Col = vec4(greyScale, greyScale, greyScale, 1.0);\n\n  vec4 sunset = vec4(1.0 / fs_Pos[1], 0.3 / fs_Pos[1], 0.0, 1.0);\n\n  if(sunset.y < 0.01)\n  {\n    out_Col = vec4(0.0, 0.0, 0.0, 1.0);\n  }\n  else\n  {\n    out_Col = mix(out_Col, sunset, 1.0 - out_Col.x / 1.25);\n  }\n}\n\n"
 
 /***/ })
 /******/ ]);
