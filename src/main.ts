@@ -19,12 +19,16 @@ let prevAngle = angle;
 let iterations = 3.0;
 let prevIterations = 3.0;
 
+let forwardLength = 3.0;
+let prevForwardLength = 3.0;
+
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = 
 {
   Iterations: 3.0,
-  Angle: PI / 8.0
+  Angle: PI / 8.0,
+  ForwardLength: 3.0
 };
 
 let square: Square;
@@ -41,7 +45,7 @@ function loadScene() {
   screenQuad = new ScreenQuad();
   screenQuad.create();
 
-  let lSystem: LSystem = new LSystem(angle, iterations);
+  let lSystem: LSystem = new LSystem(angle, iterations, forwardLength);
   
   lSystem.expand();
 
@@ -76,6 +80,7 @@ function main() {
 
   gui.add(controls, "Iterations", 0, 10).step(1);
   gui.add(controls, "Angle", -PI, PI).step(0.1);
+  gui.add(controls, "ForwardLength", 1.0, 10.0).step(0.1);
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -114,10 +119,13 @@ function main() {
 
     angle = controls.Angle;
 
-    if(angle != prevAngle || iterations != prevIterations)
+    forwardLength = controls.ForwardLength;
+
+    if(angle != prevAngle || iterations != prevIterations || forwardLength != prevForwardLength)
     {
       prevAngle = angle;
       prevIterations = iterations;
+      prevForwardLength = forwardLength;
       loadScene();
     }
 

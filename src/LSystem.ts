@@ -19,6 +19,8 @@ export default class LSystem
 
     theta: number;
 
+    forwardLength: number;
+
     // Set up instanced rendering data arrays here.
     offsetsArray: number[];
     colorsArray: number[];
@@ -39,7 +41,7 @@ export default class LSystem
     expansionRules: Map<string, ExpansionRule>;
 
 
-    constructor(angle: number, iterations: number)
+    constructor(angle: number, iterations: number, forwardLength: number)
     {
         this.drawRules = new Map();
         this.drawRules.set('F', this.moveForward.bind(this));
@@ -78,6 +80,8 @@ export default class LSystem
         this.theta = angle;
 
         this.numIterations = iterations;
+
+        this.forwardLength = forwardLength;
 
         let startingTurtle = new Turtle(vec3.fromValues(0.0, 0.0, 0.0), 
                                         vec3.fromValues(0.0, 1.0, 0.0), 
@@ -210,7 +214,7 @@ export default class LSystem
     moveForward(): boolean
     {
         let straight: mat4 = mat4.create();
-        let moveForwardRule = new DrawingRule(4.0, straight);
+        let moveForwardRule = new DrawingRule(this.forwardLength, straight);
         this.currDirection = moveForwardRule.returnNewDirection(this.currDirection);
         vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, moveForwardRule.forwardAmount);
         mat4.mul(this.currTransformMat, this.currTransformMat, moveForwardRule.orientationMat);
@@ -222,7 +226,7 @@ export default class LSystem
         let zAxis: vec3 = vec3.fromValues(0.0, 0.0, 1.0);
         let rotAboutZ = mat4.create();
         mat4.fromRotation(rotAboutZ, this.theta, zAxis);
-        let rotateAboutZ = new DrawingRule(4.0, rotAboutZ);
+        let rotateAboutZ = new DrawingRule(this.forwardLength, rotAboutZ);
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
@@ -234,7 +238,7 @@ export default class LSystem
         let zAxis: vec3 = vec3.fromValues(0.0, 0.0, 1.0);
         let rotAboutZ = mat4.create();
         mat4.fromRotation(rotAboutZ, -this.theta, zAxis);
-        let rotateAboutZ = new DrawingRule(4.0, rotAboutZ);
+        let rotateAboutZ = new DrawingRule(this.forwardLength, rotAboutZ);
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
@@ -247,7 +251,7 @@ export default class LSystem
         let zAxis: vec3 = vec3.fromValues(1.0, 0.0, 0.0);
         let rotAboutZ = mat4.create();
         mat4.fromRotation(rotAboutZ, this.theta, zAxis);
-        let rotateAboutZ = new DrawingRule(4.0, rotAboutZ);
+        let rotateAboutZ = new DrawingRule(this.forwardLength, rotAboutZ);
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
@@ -259,7 +263,7 @@ export default class LSystem
         let zAxis: vec3 = vec3.fromValues(1.0, 0.0, 0.0);
         let rotAboutZ = mat4.create();
         mat4.fromRotation(rotAboutZ, -this.theta, zAxis);
-        let rotateAboutZ = new DrawingRule(4.0, rotAboutZ);
+        let rotateAboutZ = new DrawingRule(this.forwardLength, rotAboutZ);
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
@@ -272,7 +276,7 @@ export default class LSystem
         let zAxis: vec3 = vec3.fromValues(0.0, 1.0, 0.0);
         let rotAboutZ = mat4.create();
         mat4.fromRotation(rotAboutZ, this.theta, zAxis);
-        let rotateAboutZ = new DrawingRule(4.0, rotAboutZ);
+        let rotateAboutZ = new DrawingRule(this.forwardLength, rotAboutZ);
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
@@ -284,7 +288,7 @@ export default class LSystem
         let zAxis: vec3 = vec3.fromValues(0.0, 1.0, 0.0);
         let rotAboutZ = mat4.create();
         mat4.fromRotation(rotAboutZ, -this.theta, zAxis);
-        let rotateAboutZ = new DrawingRule(4.0, rotAboutZ);
+        let rotateAboutZ = new DrawingRule(this.forwardLength, rotAboutZ);
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
