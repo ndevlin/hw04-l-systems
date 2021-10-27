@@ -6069,11 +6069,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 const PI = 3.14159;
-let angle = PI / 8.9;
+let angle = PI / 8.0;
 let prevAngle = angle;
+let iterations = 3.0;
+let prevIterations = 3.0;
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
+    Iterations: 3.0,
     Angle: PI / 8.0
 };
 let square;
@@ -6087,7 +6090,7 @@ function loadScene() {
     cube.create();
     screenQuad = new __WEBPACK_IMPORTED_MODULE_4__geometry_ScreenQuad__["a" /* default */]();
     screenQuad.create();
-    let lSystem = new __WEBPACK_IMPORTED_MODULE_10__LSystem__["a" /* default */](angle);
+    let lSystem = new __WEBPACK_IMPORTED_MODULE_10__LSystem__["a" /* default */](angle, iterations);
     lSystem.expand();
     lSystem.computeDrawingData();
     let offsets = new Float32Array(lSystem.offsetsArray);
@@ -6111,6 +6114,7 @@ function main() {
     document.body.appendChild(stats.domElement);
     // Add controls to the gui
     const gui = new __WEBPACK_IMPORTED_MODULE_2_dat_gui__["GUI"]();
+    gui.add(controls, "Iterations", 0, 10).step(1);
     gui.add(controls, "Angle", -PI, PI).step(0.1);
     // get canvas and webgl context
     const canvas = document.getElementById('canvas');
@@ -6138,9 +6142,11 @@ function main() {
     ]);
     // This function will be called every frame
     function tick() {
+        iterations = controls.Iterations;
         angle = controls.Angle;
-        if (angle != prevAngle) {
+        if (angle != prevAngle || iterations != prevIterations) {
             prevAngle = angle;
+            prevIterations = iterations;
             loadScene();
         }
         camera.update();
@@ -16751,7 +16757,7 @@ class Cube extends __WEBPACK_IMPORTED_MODULE_1__rendering_gl_Drawable__["a" /* d
 
 
 class LSystem {
-    constructor(angle) {
+    constructor(angle, iterations) {
         this.drawRules = new Map();
         this.drawRules.set('F', this.moveForward.bind(this));
         this.drawRules.set('+Z', this.rotateLeftZ.bind(this));
@@ -16773,7 +16779,7 @@ class LSystem {
         this.currDirection = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.0, 1.0, 0.0, 0.0);
         this.currTransformMat = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
         this.theta = angle;
-        this.numIterations = 3;
+        this.numIterations = iterations;
         let startingTurtle = new __WEBPACK_IMPORTED_MODULE_3__Turtle__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 0.0, 0.0), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 1.0, 0.0), 1, __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create());
         this.turtleArr = [startingTurtle];
         this.grammarString = ["F", "F", "-Z", "[", "-Z", "F", "+Z",
@@ -17041,7 +17047,7 @@ module.exports = "#version 300 es\nprecision highp float;\n\n// The vertex shade
 /* 77 */
 /***/ (function(module, exports) {
 
-module.exports = "#version 300 es\nprecision highp float;\n\nuniform vec3 u_Eye, u_Ref, u_Up;\nuniform vec2 u_Dimensions;\nuniform float u_Time;\n\nin vec2 fs_Pos;\nout vec4 out_Col;\n\n// Takes in a position vec3, returns a vec3, to be used below as a color\nvec3 noise3D( vec3 p ) \n{\n    float val1 = fract(sin((dot(p, vec3(127.1, 311.7, 191.999)))) * 4.5453);\n\n    float val2 = fract(sin((dot(p, vec3(191.999, 127.1, 311.7)))) * 3.5453);\n\n    float val3 = fract(sin((dot(p, vec3(311.7, 191.999, 127.1)))) * 7.5453);\n\n    return vec3(val1, val2, val3);\n}\n\n// Interpolate in 3 dimensions\nvec3 interpNoise3D(float x, float y, float z) \n{\n    int intX = int(floor(x));\n    float fractX = fract(x);\n    int intY = int(floor(y));\n    float fractY = fract(y);\n    int intZ = int(floor(z));\n    float fractZ = fract(z);\n\n    vec3 v1 = noise3D(vec3(intX, intY, intZ));\n    vec3 v2 = noise3D(vec3(intX + 1, intY, intZ));\n    vec3 v3 = noise3D(vec3(intX, intY + 1, intZ));\n    vec3 v4 = noise3D(vec3(intX + 1, intY + 1, intZ));\n\n    vec3 v5 = noise3D(vec3(intX, intY, intZ + 1));\n    vec3 v6 = noise3D(vec3(intX + 1, intY, intZ + 1));\n    vec3 v7 = noise3D(vec3(intX, intY + 1, intZ + 1));\n    vec3 v8 = noise3D(vec3(intX + 1, intY + 1, intZ + 1));\n\n    vec3 i1 = mix(v1, v2, fractX);\n    vec3 i2 = mix(v3, v4, fractX);\n\n    vec3 i3 = mix(i1, i2, fractY);\n\n    vec3 i4 = mix(v5, v6, fractX);\n    vec3 i5 = mix(v7, v8, fractX);\n\n    vec3 i6 = mix(i4, i5, fractY);\n\n    vec3 i7 = mix(i3, i6, fractZ);\n\n    return i7;\n}\n\n// 3D Fractal Brownian Motion\nvec3 fbm(float x, float y, float z, int octaves) \n{\n    vec3 total = vec3(0.f, 0.f, 0.f);\n\n    float persistence = 0.5f;\n\n    for(int i = 1; i <= octaves; i++) \n    {\n        float freq = pow(3.f, float(i));\n        float amp = pow(persistence, float(i));\n\n        total += interpNoise3D(x * freq, y * freq, z * freq) * amp;\n    }\n    \n    return total;\n}\n\n\nvoid main() \n{\n  //out_Col = vec4(0.5 * (fs_Pos + vec2(1.0)), 0.0, 1.0);\n\n  //out_Col = vec4(0.0, 0.0, 0.0, 1.0);\n\n  vec3 fbmOut = fbm(fs_Pos.x, fs_Pos.y, 0.0, 12);\n  float greyScale = fbmOut.x / fbmOut.y * fbmOut.z;\n\n  greyScale = pow(greyScale, 0.75);\n\n  out_Col = vec4(greyScale, greyScale, greyScale, 1.0);\n\n  vec4 sunset = vec4(1.0 / fs_Pos[1], 0.3 / fs_Pos[1], 0.0, 1.0);\n\n  if(sunset.y < 0.01)\n  {\n    out_Col = vec4(0.0, 0.0, 0.0, 1.0);\n  }\n  else\n  {\n    out_Col = mix(out_Col, sunset, 1.0 - out_Col.x / 1.25);\n  }\n}\n\n"
+module.exports = "#version 300 es\nprecision highp float;\n\nuniform vec3 u_Eye, u_Ref, u_Up;\nuniform vec2 u_Dimensions;\nuniform float u_Time;\n\nin vec2 fs_Pos;\nout vec4 out_Col;\n\n// Takes in a position vec3, returns a vec3, to be used below as a color\nvec3 noise3D( vec3 p ) \n{\n    float val1 = fract(sin((dot(p, vec3(127.1, 311.7, 191.999)))) * 4.5453);\n\n    float val2 = fract(sin((dot(p, vec3(191.999, 127.1, 311.7)))) * 3.5453);\n\n    float val3 = fract(sin((dot(p, vec3(311.7, 191.999, 127.1)))) * 7.5453);\n\n    return vec3(val1, val2, val3);\n}\n\n// Interpolate in 3 dimensions\nvec3 interpNoise3D(float x, float y, float z) \n{\n    int intX = int(floor(x));\n    float fractX = fract(x);\n    int intY = int(floor(y));\n    float fractY = fract(y);\n    int intZ = int(floor(z));\n    float fractZ = fract(z);\n\n    vec3 v1 = noise3D(vec3(intX, intY, intZ));\n    vec3 v2 = noise3D(vec3(intX + 1, intY, intZ));\n    vec3 v3 = noise3D(vec3(intX, intY + 1, intZ));\n    vec3 v4 = noise3D(vec3(intX + 1, intY + 1, intZ));\n\n    vec3 v5 = noise3D(vec3(intX, intY, intZ + 1));\n    vec3 v6 = noise3D(vec3(intX + 1, intY, intZ + 1));\n    vec3 v7 = noise3D(vec3(intX, intY + 1, intZ + 1));\n    vec3 v8 = noise3D(vec3(intX + 1, intY + 1, intZ + 1));\n\n    vec3 i1 = mix(v1, v2, fractX);\n    vec3 i2 = mix(v3, v4, fractX);\n\n    vec3 i3 = mix(i1, i2, fractY);\n\n    vec3 i4 = mix(v5, v6, fractX);\n    vec3 i5 = mix(v7, v8, fractX);\n\n    vec3 i6 = mix(i4, i5, fractY);\n\n    vec3 i7 = mix(i3, i6, fractZ);\n\n    return i7;\n}\n\n// 3D Fractal Brownian Motion\nvec3 fbm(float x, float y, float z, int octaves) \n{\n    vec3 total = vec3(0.f, 0.f, 0.f);\n\n    float persistence = 0.5f;\n\n    for(int i = 1; i <= octaves; i++) \n    {\n        float freq = pow(3.f, float(i));\n        float amp = pow(persistence, float(i));\n\n        total += interpNoise3D(x * freq, y * freq, z * freq) * amp;\n    }\n    \n    return total;\n}\n\n\nvoid main() \n{\n  //out_Col = vec4(0.5 * (fs_Pos + vec2(1.0)), 0.0, 1.0);\n\n  //out_Col = vec4(0.0, 0.0, 0.0, 1.0);\n\n  float eyeComposite = (u_Eye.x + u_Eye.y + u_Eye.z) / 100.0;\n  vec3 fbmOut = fbm(fs_Pos.x + eyeComposite, fs_Pos.y, 0.0, 12);\n  float greyScale = fbmOut.x / fbmOut.y * fbmOut.z;\n\n  greyScale = pow(greyScale, 0.75);\n\n  out_Col = vec4(greyScale, greyScale, greyScale, 1.0);\n\n  vec4 sunset = vec4(1.0 / fs_Pos[1], 0.3 / fs_Pos[1], 0.0, 1.0);\n\n  if(sunset.y < 0.01)\n  {\n    out_Col = vec4(0.0, 0.0, 0.0, 1.0);\n  }\n  else\n  {\n    out_Col = mix(out_Col, sunset, 1.0 - out_Col.x / 1.25);\n  }\n}\n\n"
 
 /***/ })
 /******/ ]);
