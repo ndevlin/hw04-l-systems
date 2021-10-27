@@ -24,6 +24,8 @@ export default class LSystem
 
     theColor: vec4;
 
+    barkColor: vec4;
+
     // Set up instanced rendering data arrays here.
     offsetsArray: number[];
     colorsArray: number[];
@@ -45,7 +47,7 @@ export default class LSystem
     expansionRules: Map<string, ExpansionRule>;
 
 
-    constructor(angle: number, iterations: number, forwardLength: number)
+    constructor(angle: number, iterations: number, forwardLength: number, barkColor: vec4)
     {
         this.drawRules = new Map();
         this.drawRules.set('F', this.moveForward.bind(this));
@@ -90,7 +92,9 @@ export default class LSystem
 
         this.forwardLength = forwardLength;
 
-        this.theColor = vec4.fromValues(0.4588, 0.2353, 0.1333, 1.0);
+        this.theColor = barkColor;
+
+        this.barkColor = barkColor;
 
         let startingTurtle = new Turtle(vec3.fromValues(0.0, 0.0, 0.0), 
                                         vec3.fromValues(0.0, 1.0, 0.0), 
@@ -230,7 +234,7 @@ export default class LSystem
 
         mat4.mul(this.currTransformMat, this.currTransformMat, moveForwardRule.orientationMat);
         
-        this.theColor = vec4.fromValues(0.4588, 0.2353, 0.1333, 1.0);
+        this.theColor = this.barkColor;
 
         return true;
     }
@@ -245,7 +249,7 @@ export default class LSystem
         vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
         
-        this.theColor = vec4.fromValues(0.4588, 0.2353, 0.1333, 1.0);
+        this.theColor = this.barkColor;
 
         return true;
     }
@@ -260,7 +264,7 @@ export default class LSystem
         vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
         
-        this.theColor = vec4.fromValues(0.4588, 0.2353, 0.1333, 1.0);
+        this.theColor = this.barkColor;
 
         return true;
     }
@@ -276,7 +280,7 @@ export default class LSystem
         vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
 
-        this.theColor = vec4.fromValues(0.4588, 0.2353, 0.1333, 1.0);
+        this.theColor = this.barkColor;
 
         return true;
     }
@@ -291,7 +295,7 @@ export default class LSystem
         vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
         
-        this.theColor = vec4.fromValues(0.4588, 0.2353, 0.1333, 1.0);
+        this.theColor = this.barkColor;
 
         return true;
     }
@@ -307,8 +311,7 @@ export default class LSystem
         vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
         
-        this.theColor = vec4.fromValues(0.4588, 0.2353, 0.1333, 1.0);
-
+        this.theColor = this.barkColor;
         return true;
     }
 
@@ -322,7 +325,7 @@ export default class LSystem
         vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
         
-        this.theColor = vec4.fromValues(0.4588, 0.2353, 0.1333, 1.0);
+        this.theColor = this.barkColor;
 
         return true;
     }
@@ -357,6 +360,7 @@ export default class LSystem
         this.currTransformMat = currTurtle.transform;
         this.currRecursionLevel = currTurtle.recursionDepth;
 
+        // Green: Leaf Color
         this.theColor = vec4.fromValues(0.1647, 0.4863, 0.1373, 1.0);
 
         return false;

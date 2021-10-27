@@ -23,6 +23,10 @@ let prevIterations = 1.0;
 let forwardLength = 3.0;
 let prevForwardLength = 3.0;
 
+let barkColor: vec4 = vec4.fromValues(0.4588, 0.2353, 0.1333, 1.0);
+let prevBarkColor: vec4 = vec4.fromValues(0.5, 0.25, 0.125, 1.0);
+
+
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = 
@@ -30,6 +34,11 @@ const controls =
   Iterations: 1.0,
   Angle: PI / 8.0,
   ForwardLength: 3.0
+};
+
+const colorControl = 
+{
+  BarkColor: [128, 64, 32]
 };
 
 let square: Square;
@@ -49,7 +58,7 @@ function loadScene() {
   screenQuad = new ScreenQuad();
   screenQuad.create();
 
-  let lSystem: LSystem = new LSystem(angle, iterations, forwardLength);
+  let lSystem: LSystem = new LSystem(angle, iterations, forwardLength, barkColor);
   
   lSystem.expand();
 
@@ -87,6 +96,8 @@ function main() {
   gui.add(controls, "Iterations", 0, 10).step(1);
   gui.add(controls, "Angle", -PI, PI).step(0.1);
   gui.add(controls, "ForwardLength", 1.0, 10.0).step(0.1);
+
+  gui.addColor(colorControl, 'BarkColor');
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -127,11 +138,17 @@ function main() {
 
     forwardLength = controls.ForwardLength;
 
-    if(angle != prevAngle || iterations != prevIterations || forwardLength != prevForwardLength)
+    barkColor = vec4.fromValues(colorControl.BarkColor[0] / 256.0, 
+                                colorControl.BarkColor[1] / 256.0,
+                                colorControl.BarkColor[2] / 256.0, 1.0);
+
+    if(angle != prevAngle || iterations != prevIterations 
+      || forwardLength != prevForwardLength || barkColor != prevBarkColor)
     {
       prevAngle = angle;
       prevIterations = iterations;
       prevForwardLength = forwardLength;
+      prevBarkColor = barkColor;
       loadScene();
     }
 
