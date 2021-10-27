@@ -21,6 +21,8 @@ export default class LSystem
 
     forwardLength: number;
 
+    theColor: vec4;
+
     // Set up instanced rendering data arrays here.
     offsetsArray: number[];
     colorsArray: number[];
@@ -82,6 +84,8 @@ export default class LSystem
         this.numIterations = iterations;
 
         this.forwardLength = forwardLength;
+
+        this.theColor = vec4.fromValues(0.4588, 0.2353, 0.1333, 1.0);
 
         let startingTurtle = new Turtle(vec3.fromValues(0.0, 0.0, 0.0), 
                                         vec3.fromValues(0.0, 1.0, 0.0), 
@@ -199,14 +203,10 @@ export default class LSystem
                 this.offsetsArray.push(this.currPos[2]);
                 this.numCylinders++;
             }
-        }
-        
-        
-        for(let i = 0; i < this.numCylinders; i++)
-        {
-            this.colorsArray.push(1.0);
-            this.colorsArray.push(0.0);
-            this.colorsArray.push(0.0);
+
+            this.colorsArray.push(this.theColor[0]);
+            this.colorsArray.push(this.theColor[1]);
+            this.colorsArray.push(this.theColor[2]);
             this.colorsArray.push(1.0); // Alpha channel
         }
     }
@@ -217,7 +217,11 @@ export default class LSystem
         let moveForwardRule = new DrawingRule(this.forwardLength, straight);
         this.currDirection = moveForwardRule.returnNewDirection(this.currDirection);
         vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, moveForwardRule.forwardAmount);
+
         mat4.mul(this.currTransformMat, this.currTransformMat, moveForwardRule.orientationMat);
+        
+        this.theColor = vec4.fromValues(0.4588, 0.2353, 0.1333, 1.0);
+
         return true;
     }
 
@@ -230,6 +234,9 @@ export default class LSystem
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
+        
+        this.theColor = vec4.fromValues(0.4588, 0.2353, 0.1333, 1.0);
+
         return true;
     }
 
@@ -242,6 +249,9 @@ export default class LSystem
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
+        
+        this.theColor = vec4.fromValues(0.4588, 0.2353, 0.1333, 1.0);
+
         return true;
     }
 
@@ -255,6 +265,9 @@ export default class LSystem
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
+
+        this.theColor = vec4.fromValues(0.4588, 0.2353, 0.1333, 1.0);
+
         return true;
     }
 
@@ -267,6 +280,9 @@ export default class LSystem
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
+        
+        this.theColor = vec4.fromValues(0.4588, 0.2353, 0.1333, 1.0);
+
         return true;
     }
 
@@ -280,6 +296,9 @@ export default class LSystem
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
+        
+        this.theColor = vec4.fromValues(0.4588, 0.2353, 0.1333, 1.0);
+
         return true;
     }
 
@@ -292,6 +311,9 @@ export default class LSystem
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
+        
+        this.theColor = vec4.fromValues(0.4588, 0.2353, 0.1333, 1.0);
+
         return true;
     }
 
@@ -299,18 +321,16 @@ export default class LSystem
     storeTurtle(): boolean
     {
         this.currRecursionLevel++;
-        let scaleFactor: number = 1.0 - (this.currRecursionLevel / 100.0);
 
-        
-        this.currTransformMat[0] *= scaleFactor;
-        this.currTransformMat[5] *= scaleFactor;
-        this.currTransformMat[10] *= scaleFactor;
-        
+        let scaleFactor: number = 1.0 - (this.currRecursionLevel / 500.0);
+        mat4.scale(this.currTransformMat, this.currTransformMat, 
+            vec3.fromValues(scaleFactor, scaleFactor, scaleFactor));
         
         let newTurtle: Turtle = new Turtle(vec3.fromValues(this.currPos[0], this.currPos[1], this.currPos[2]), 
                                             vec3.fromValues(this.currDirection[0], this.currDirection[1], this.currDirection[2]), 
                                                 this.currRecursionLevel, this.currTransformMat);
         this.turtleArr.push(newTurtle);
+
         return false;
     }
 
@@ -325,6 +345,8 @@ export default class LSystem
     
         this.currTransformMat = currTurtle.transform;
         this.currRecursionLevel = currTurtle.recursionDepth;
+
+        this.theColor = vec4.fromValues(0.1647, 0.4863, 0.1373, 1.0);
 
         return false;
     }

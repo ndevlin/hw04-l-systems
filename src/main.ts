@@ -9,6 +9,7 @@ import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 import Cylinder from './geometry/Cylinder';
 import LSystem from './LSystem';
+import Cube from './geometry/Cube';
 
 
 const PI = 3.14159;
@@ -32,7 +33,8 @@ const controls =
 };
 
 let square: Square;
-let cube: Cylinder;
+let cylinder: Cylinder;
+let cube: Cube;
 let screenQuad: ScreenQuad;
 let time: number = 0.0;
 
@@ -40,7 +42,9 @@ let time: number = 0.0;
 function loadScene() {
   square = new Square();
   square.create();
-  cube = new Cylinder();
+  cylinder = new Cylinder();
+  cylinder.create();
+  cube = new Cube();
   cube.create();
   screenQuad = new ScreenQuad();
   screenQuad.create();
@@ -59,11 +63,11 @@ function loadScene() {
   let col2Out: Float32Array = new Float32Array(lSystem.col2);
   let col3Out: Float32Array = new Float32Array(lSystem.col3);
 
-  square.setInstanceVBOs(offsets, colors);
-  square.setNumInstances(lSystem.numCylinders); // grid of "particles"
+  //square.setInstanceVBOs(offsets, colors);
+  //square.setNumInstances(lSystem.numCylinders); // grid of "particles"
 
-  cube.setInstanceVBOs(offsets, colors, col0Out, col1Out, col2Out, col3Out);
-  cube.setNumInstances(lSystem.numCylinders); // grid of "particles"
+  cylinder.setInstanceVBOs(offsets, colors, col0Out, col1Out, col2Out, col3Out);
+  cylinder.setNumInstances(lSystem.numCylinders); // grid of "particles"
 }
 
 function main() {
@@ -138,7 +142,7 @@ function main() {
     renderer.render(camera, flat, [screenQuad]);
 
     //renderer.render(camera, instancedShader, [square,]);
-    renderer.render(camera, instancedShader, [cube,]);
+    renderer.render(camera, instancedShader, [cylinder,]);
 
     stats.end();
 
