@@ -6085,8 +6085,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 const PI = 3.14159;
 let angle = PI / 8.0;
 let prevAngle = angle;
-let iterations = 1.0;
-let prevIterations = 1.0;
+let iterations = 2.0;
+let prevIterations = 2.0;
 let forwardLength = 3.0;
 let prevForwardLength = 3.0;
 let barkColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.4588, 0.2353, 0.1333, 1.0);
@@ -6094,7 +6094,7 @@ let prevBarkColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].from
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
-    Iterations: 1.0,
+    Iterations: 2.0,
     Angle: PI / 8.0,
     ForwardLength: 3.0
 };
@@ -16790,10 +16790,10 @@ class LSystem {
         this.drawRules.set(']', this.loadTurtle.bind(this));
         this.expansionRules = new Map();
         let expandRuleF = new __WEBPACK_IMPORTED_MODULE_1__ExpansionRule__["a" /* default */]("F", ["F", "F", "F", "-Z",
-            "[", "-X", "-Z", "F", "+X", "+Z", "F", "]",
-            "+Z", "[", "+X", "+Z", "F", "-X", "-Z", "F", "]"]);
+            "[", "+X", "-Z", "F", "-X", "+Z", "F", "]",
+            "+Z", "[", "-X", "+Z", "F", "+X", "-Z", "F", "]"]);
         this.expansionRules.set("F", expandRuleF);
-        let expandRuleA = new __WEBPACK_IMPORTED_MODULE_1__ExpansionRule__["a" /* default */]("A", ["F", "F", "+Z", "+X", "[", "+Z", "+X", "F", "]", "-Z", "-X", "[", "-X", "-Z", "F", "]"]);
+        let expandRuleA = new __WEBPACK_IMPORTED_MODULE_1__ExpansionRule__["a" /* default */]("A", ["F", "F", "+Z", "-X", "[", "+Z", "-X", "F", "]", "-Z", "+X", "[", "+X", "-Z", "F", "]"]);
         this.expansionRules.set("A", expandRuleA);
         this.currRecursionLevel = 1;
         this.currPos = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.0, 0.0, 0.0, 1.0);
