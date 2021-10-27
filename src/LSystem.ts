@@ -66,15 +66,11 @@ export default class LSystem
 
         this.expansionRules = new Map();
 
-        let expandRuleF = new ExpansionRule("F", ["F", "F", "F",
-                                             "[", "-Z", "F", 
-                                             "F", "]", "[", 
-                                             "+Z", "F", "-Z", "F", "]"]);
+        let expandRuleF = new ExpansionRule("F", ["F", "F", "F", "-Z",
+                                             "[", "-X", "-Z", "F", "+X", "+Z", "F", "]", 
+                                             "+Z", "[", "+X", "+Z", "F", "-X", "-Z", "F", "]"]);
         this.expansionRules.set("F", expandRuleF);
-        let expandRuleA = new ExpansionRule("A", ["F", "F", "+",
-                                             "[", "+", "F", "]", "+", 
-                                             "[", "F", "]", "+", "[", 
-                                             "+", "F", "-", "F", "]"]);
+        let expandRuleA = new ExpansionRule("A", ["F", "F", "+Z", "+X", "[", "+Z", "+X", "F", "]", "-Z", "-X", "[", "-X", "-Z", "F", "]"]);
         this.expansionRules.set("A", expandRuleA);
 
 
@@ -102,9 +98,8 @@ export default class LSystem
                                         mat4.create());
 
         this.turtleArr = [startingTurtle];
-        this.grammarString = ["F", "A", "F", "-Z", "[", "-Z", "F", "+Z", 
-                                "F", "]", "+X", "[", "+Z", "F", "-Z", 
-                                "F", "]"];
+        this.grammarString = ["F", "+X", "+Z", "[", "A", "]", 
+                                "-Z", "-X", "[", "A", "]"];
         this.axiomString = "F";
         this.currTurtle = 0;
 

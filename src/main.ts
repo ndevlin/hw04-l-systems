@@ -17,8 +17,8 @@ const PI = 3.14159;
 let angle: number = PI / 8.0;
 let prevAngle = angle;
 
-let iterations = 3.0;
-let prevIterations = 3.0;
+let iterations = 1.0;
+let prevIterations = 1.0;
 
 let forwardLength = 3.0;
 let prevForwardLength = 3.0;
@@ -27,7 +27,7 @@ let prevForwardLength = 3.0;
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = 
 {
-  Iterations: 3.0,
+  Iterations: 1.0,
   Angle: PI / 8.0,
   ForwardLength: 3.0
 };
