@@ -6055,7 +6055,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__Camera__ = __webpack_require__(33);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__globals__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__ = __webpack_require__(68);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__geometry_Cube__ = __webpack_require__(69);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__geometry_Cylinder__ = __webpack_require__(69);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__LSystem__ = __webpack_require__(70);
 
 
@@ -6089,7 +6089,7 @@ let time = 0.0;
 function loadScene() {
     square = new __WEBPACK_IMPORTED_MODULE_3__geometry_Square__["a" /* default */]();
     square.create();
-    cube = new __WEBPACK_IMPORTED_MODULE_9__geometry_Cube__["a" /* default */]();
+    cube = new __WEBPACK_IMPORTED_MODULE_9__geometry_Cylinder__["a" /* default */]();
     cube.create();
     screenQuad = new __WEBPACK_IMPORTED_MODULE_4__geometry_ScreenQuad__["a" /* default */]();
     screenQuad.create();
@@ -16613,99 +16613,74 @@ class ShaderProgram {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_gl_matrix__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__rendering_gl_Drawable__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__globals__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__rendering_gl_Drawable__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__globals__ = __webpack_require__(2);
 
 
-
-class Cube extends __WEBPACK_IMPORTED_MODULE_1__rendering_gl_Drawable__["a" /* default */] {
+const root2 = 1.41421346;
+class Cylinder extends __WEBPACK_IMPORTED_MODULE_0__rendering_gl_Drawable__["a" /* default */] {
     constructor() {
         super(); // Call the constructor of the super class.
-        this.center = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.0, 0.0, 0.0, 0.0);
+        this.height = 4.0;
     }
     create() {
         // Positions array
         this.positions = new Float32Array([
-            // First Face
-            -1 + this.center[0], -1 + this.center[1], 1 + this.center[2], 1,
-            1 + this.center[0], -1 + this.center[1], 1 + this.center[2], 1,
-            1 + this.center[0], 1 + this.center[1], 1 + this.center[2], 1,
-            -1 + this.center[0], 1 + this.center[1], 1 + this.center[2], 1,
-            // Second Face
-            -1 + this.center[0], -1 + this.center[1], -1 + this.center[2], 1,
-            1 + this.center[0], -1 + this.center[1], -1 + this.center[2], 1,
-            1 + this.center[0], 1 + this.center[1], -1 + this.center[2], 1,
-            -1 + this.center[0], 1 + this.center[1], -1 + this.center[2], 1,
-            // Third Face
-            1 + this.center[0], -1 + this.center[1], 1 + this.center[2], 1,
-            1 + this.center[0], -1 + this.center[1], -1 + this.center[2], 1,
-            1 + this.center[0], 1 + this.center[1], -1 + this.center[2], 1,
-            1 + this.center[0], 1 + this.center[1], 1 + this.center[2], 1,
-            // Fourth Face
-            -1 + this.center[0], -1 + this.center[1], 1 + this.center[2], 1,
-            -1 + this.center[0], -1 + this.center[1], -1 + this.center[2], 1,
-            -1 + this.center[0], 1 + this.center[1], -1 + this.center[2], 1,
-            -1 + this.center[0], 1 + this.center[1], 1 + this.center[2], 1,
-            // Fifth Face
-            -1 + this.center[0], -1 + this.center[1], 1 + this.center[2], 1,
-            1 + this.center[0], -1 + this.center[1], 1 + this.center[2], 1,
-            1 + this.center[0], -1 + this.center[1], -1 + this.center[2], 1,
-            -1 + this.center[0], -1 + this.center[1], -1 + this.center[2], 1,
-            // Sixth Face
-            -1 + this.center[0], 1 + this.center[1], 1 + this.center[2], 1,
-            1 + this.center[0], 1 + this.center[1], 1 + this.center[2], 1,
-            1 + this.center[0], 1 + this.center[1], -1 + this.center[2], 1,
-            -1 + this.center[0], 1 + this.center[1], -1 + this.center[2], 1
+            // Bottom
+            1, 0, 1, 1,
+            root2, 0, 0, 1,
+            1, 0, -1, 1,
+            0, 0, -root2, 1,
+            -1, 0, -1, 1,
+            -root2, 0, 0, 1,
+            -1, 0, 1, 1,
+            0, 0, root2, 1,
+            // Top
+            1, this.height, 1, 1,
+            root2, this.height, 0, 1,
+            1, this.height, -1, 1,
+            0, this.height, -root2, 1,
+            -1, this.height, -1, 1,
+            -root2, this.height, 0, 1,
+            -1, this.height, 1, 1,
+            0, this.height, root2, 1,
         ]);
         // Indices array
         this.indices = new Uint32Array([
-            // First Face
-            0, 1, 2, 0, 2, 3,
-            // Second Face
-            4, 5, 6, 4, 6, 7,
-            // Third Face
-            8, 9, 10, 8, 10, 11,
-            // Fourth Face
-            12, 13, 14, 12, 14, 15,
-            // Fifth Face
-            16, 17, 18, 16, 18, 19,
-            // Sixth Face
-            20, 21, 22, 20, 22, 23
+            // Rectangles
+            0, 1, 9,
+            0, 9, 8,
+            1, 2, 10,
+            1, 10, 9,
+            2, 3, 11,
+            2, 11, 10,
+            3, 4, 12,
+            3, 12, 11,
+            4, 5, 13,
+            4, 13, 12,
+            5, 6, 14,
+            5, 14, 13,
+            6, 7, 15,
+            6, 15, 14,
+            7, 0, 8,
+            7, 8, 15,
+            // Bottom
+            0, 1, 2,
+            0, 2, 3,
+            0, 3, 4,
+            0, 4, 5,
+            0, 5, 6,
+            0, 6, 7,
+            // Top
+            8, 9, 10,
+            8, 10, 11,
+            8, 11, 12,
+            8, 12, 13,
+            8, 13, 14,
+            8, 14, 15
         ]);
         // Normals array
-        this.normals = new Float32Array([
-            // First Face
-            0, 0, 1, 0,
-            0, 0, 1, 0,
-            0, 0, 1, 0,
-            0, 0, 1, 0,
-            // Second Face
-            0, 0, -1, 0,
-            0, 0, -1, 0,
-            0, 0, -1, 0,
-            0, 0, -1, 0,
-            // Third Face
-            1, 0, 0, 0,
-            1, 0, 0, 0,
-            1, 0, 0, 0,
-            1, 0, 0, 0,
-            // Fourth Face
-            -1, 0, 0, 0,
-            -1, 0, 0, 0,
-            -1, 0, 0, 0,
-            -1, 0, 0, 0,
-            // Fifth Face
-            0, -1, 0, 0,
-            0, -1, 0, 0,
-            0, -1, 0, 0,
-            0, -1, 0, 0,
-            // Sixth Face
-            0, 1, 0, 0,
-            0, 1, 0, 0,
-            0, 1, 0, 0,
-            0, 1, 0, 0
-        ]);
+        this.normals = new Float32Array([]);
         this.generateIdx();
         this.generatePos();
         this.generateCol();
@@ -16716,12 +16691,12 @@ class Cube extends __WEBPACK_IMPORTED_MODULE_1__rendering_gl_Drawable__["a" /* d
         this.generateMatCol2();
         this.generateMatCol3();
         this.count = this.indices.length;
-        __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].bindBuffer(__WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].ELEMENT_ARRAY_BUFFER, this.bufIdx);
-        __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].bufferData(__WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].ELEMENT_ARRAY_BUFFER, this.indices, __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].STATIC_DRAW);
-        __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].bindBuffer(__WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].ARRAY_BUFFER, this.bufNor);
-        __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].bufferData(__WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].ARRAY_BUFFER, this.normals, __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].STATIC_DRAW);
-        __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].bindBuffer(__WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].ARRAY_BUFFER, this.bufPos);
-        __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].bufferData(__WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].ARRAY_BUFFER, this.positions, __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].STATIC_DRAW);
+        __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].bindBuffer(__WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].ELEMENT_ARRAY_BUFFER, this.bufIdx);
+        __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].bufferData(__WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].ELEMENT_ARRAY_BUFFER, this.indices, __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].STATIC_DRAW);
+        __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].bindBuffer(__WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].ARRAY_BUFFER, this.bufNor);
+        __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].bufferData(__WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].ARRAY_BUFFER, this.normals, __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].STATIC_DRAW);
+        __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].bindBuffer(__WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].ARRAY_BUFFER, this.bufPos);
+        __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].bufferData(__WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].ARRAY_BUFFER, this.positions, __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].STATIC_DRAW);
         console.log(`Created Cube`);
     }
     setInstanceVBOs(offsets, colors, matCol0In, matCol1In, matCol2In, matCol3In) {
@@ -16731,22 +16706,22 @@ class Cube extends __WEBPACK_IMPORTED_MODULE_1__rendering_gl_Drawable__["a" /* d
         this.matCol1 = matCol1In;
         this.matCol2 = matCol2In;
         this.matCol3 = matCol3In;
-        __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].bindBuffer(__WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].ARRAY_BUFFER, this.bufCol);
-        __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].bufferData(__WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].ARRAY_BUFFER, this.colors, __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].STATIC_DRAW);
-        __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].bindBuffer(__WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].ARRAY_BUFFER, this.bufTranslate);
-        __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].bufferData(__WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].ARRAY_BUFFER, this.offsets, __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].STATIC_DRAW);
-        __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].bindBuffer(__WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].ARRAY_BUFFER, this.bufMatCol0);
-        __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].bufferData(__WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].ARRAY_BUFFER, this.matCol0, __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].STATIC_DRAW);
-        __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].bindBuffer(__WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].ARRAY_BUFFER, this.bufMatCol1);
-        __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].bufferData(__WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].ARRAY_BUFFER, this.matCol1, __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].STATIC_DRAW);
-        __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].bindBuffer(__WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].ARRAY_BUFFER, this.bufMatCol2);
-        __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].bufferData(__WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].ARRAY_BUFFER, this.matCol2, __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].STATIC_DRAW);
-        __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].bindBuffer(__WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].ARRAY_BUFFER, this.bufMatCol3);
-        __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].bufferData(__WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].ARRAY_BUFFER, this.matCol3, __WEBPACK_IMPORTED_MODULE_2__globals__["a" /* gl */].STATIC_DRAW);
+        __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].bindBuffer(__WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].ARRAY_BUFFER, this.bufCol);
+        __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].bufferData(__WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].ARRAY_BUFFER, this.colors, __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].STATIC_DRAW);
+        __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].bindBuffer(__WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].ARRAY_BUFFER, this.bufTranslate);
+        __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].bufferData(__WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].ARRAY_BUFFER, this.offsets, __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].STATIC_DRAW);
+        __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].bindBuffer(__WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].ARRAY_BUFFER, this.bufMatCol0);
+        __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].bufferData(__WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].ARRAY_BUFFER, this.matCol0, __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].STATIC_DRAW);
+        __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].bindBuffer(__WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].ARRAY_BUFFER, this.bufMatCol1);
+        __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].bufferData(__WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].ARRAY_BUFFER, this.matCol1, __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].STATIC_DRAW);
+        __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].bindBuffer(__WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].ARRAY_BUFFER, this.bufMatCol2);
+        __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].bufferData(__WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].ARRAY_BUFFER, this.matCol2, __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].STATIC_DRAW);
+        __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].bindBuffer(__WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].ARRAY_BUFFER, this.bufMatCol3);
+        __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].bufferData(__WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].ARRAY_BUFFER, this.matCol3, __WEBPACK_IMPORTED_MODULE_1__globals__["a" /* gl */].STATIC_DRAW);
     }
 }
 ;
-/* harmony default export */ __webpack_exports__["a"] = (Cube);
+/* harmony default export */ __webpack_exports__["a"] = (Cylinder);
 
 
 /***/ }),
