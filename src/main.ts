@@ -13,13 +13,17 @@ import LSystem from './LSystem';
 
 const PI = 3.14159;
 
-let angle: number = PI / 8.9;
+let angle: number = PI / 8.0;
 let prevAngle = angle;
+
+let iterations = 3.0;
+let prevIterations = 3.0;
 
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = 
 {
+  Iterations: 3.0,
   Angle: PI / 8.0
 };
 
@@ -37,7 +41,7 @@ function loadScene() {
   screenQuad = new ScreenQuad();
   screenQuad.create();
 
-  let lSystem: LSystem = new LSystem(angle);
+  let lSystem: LSystem = new LSystem(angle, iterations);
   
   lSystem.expand();
 
@@ -70,6 +74,7 @@ function main() {
   // Add controls to the gui
   const gui = new DAT.GUI();
 
+  gui.add(controls, "Iterations", 0, 10).step(1);
   gui.add(controls, "Angle", -PI, PI).step(0.1);
 
   // get canvas and webgl context
@@ -103,13 +108,16 @@ function main() {
   ]);
 
   // This function will be called every frame
-  function tick() {
+  function tick() 
+  {
+    iterations = controls.Iterations;
 
     angle = controls.Angle;
 
-    if(angle != prevAngle)
+    if(angle != prevAngle || iterations != prevIterations)
     {
       prevAngle = angle;
+      prevIterations = iterations;
       loadScene();
     }
 

@@ -80,7 +80,8 @@ void main()
 
   //out_Col = vec4(0.0, 0.0, 0.0, 1.0);
 
-  vec3 fbmOut = fbm(fs_Pos.x, fs_Pos.y, 0.0, 12);
+  float eyeComposite = (u_Eye.x + u_Eye.y + u_Eye.z) / 100.0;
+  vec3 fbmOut = fbm(fs_Pos.x + eyeComposite, fs_Pos.y, 0.0, 12);
   float greyScale = fbmOut.x / fbmOut.y * fbmOut.z;
 
   greyScale = pow(greyScale, 0.75);

@@ -39,7 +39,7 @@ export default class LSystem
     expansionRules: Map<string, ExpansionRule>;
 
 
-    constructor(angle: number)
+    constructor(angle: number, iterations: number)
     {
         this.drawRules = new Map();
         this.drawRules.set('F', this.moveForward.bind(this));
@@ -77,7 +77,7 @@ export default class LSystem
 
         this.theta = angle;
 
-        this.numIterations = 3;
+        this.numIterations = iterations;
 
         let startingTurtle = new Turtle(vec3.fromValues(0.0, 0.0, 0.0), 
                                         vec3.fromValues(0.0, 1.0, 0.0), 
