@@ -17,8 +17,8 @@ const PI = 3.14159;
 let angle: number = PI / 8.0;
 let prevAngle = angle;
 
-let iterations = 1.0;
-let prevIterations = 1.0;
+let iterations = 2.0;
+let prevIterations = 2.0;
 
 let forwardLength = 3.0;
 let prevForwardLength = 3.0;
@@ -31,7 +31,7 @@ let prevBarkColor: vec4 = vec4.fromValues(0.5, 0.25, 0.125, 1.0);
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = 
 {
-  Iterations: 1.0,
+  Iterations: 2.0,
   Angle: PI / 8.0,
   ForwardLength: 3.0
 };

@@ -69,10 +69,10 @@ export default class LSystem
         this.expansionRules = new Map();
 
         let expandRuleF = new ExpansionRule("F", ["F", "F", "F", "-Z",
-                                             "[", "-X", "-Z", "F", "+X", "+Z", "F", "]", 
-                                             "+Z", "[", "+X", "+Z", "F", "-X", "-Z", "F", "]"]);
+                                             "[", "+X", "-Z", "F", "-X", "+Z", "F", "]", 
+                                             "+Z", "[", "-X", "+Z", "F", "+X", "-Z", "F", "]"]);
         this.expansionRules.set("F", expandRuleF);
-        let expandRuleA = new ExpansionRule("A", ["F", "F", "+Z", "+X", "[", "+Z", "+X", "F", "]", "-Z", "-X", "[", "-X", "-Z", "F", "]"]);
+        let expandRuleA = new ExpansionRule("A", ["F", "F", "+Z", "-X", "[", "+Z", "-X", "F", "]", "-Z", "+X", "[", "+X", "-Z", "F", "]"]);
         this.expansionRules.set("A", expandRuleA);
 
 
