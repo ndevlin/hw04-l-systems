@@ -7,7 +7,7 @@ import OpenGLRenderer from './rendering/gl/OpenGLRenderer';
 import Camera from './Camera';
 import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
-import Cube from './geometry/Cube';
+import Cylinder from './geometry/Cylinder';
 import LSystem from './LSystem';
 
 
@@ -32,7 +32,7 @@ const controls =
 };
 
 let square: Square;
-let cube: Cube;
+let cube: Cylinder;
 let screenQuad: ScreenQuad;
 let time: number = 0.0;
 
@@ -40,7 +40,7 @@ let time: number = 0.0;
 function loadScene() {
   square = new Square();
   square.create();
-  cube = new Cube();
+  cube = new Cylinder();
   cube.create();
   screenQuad = new ScreenQuad();
   screenQuad.create();
