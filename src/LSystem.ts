@@ -14,6 +14,7 @@ export default class LSystem
     currPos: vec4;
     currDirection: vec4;
     currTransformMat: mat4;
+    currScale: number;
 
     numIterations: number;
 
@@ -64,11 +65,16 @@ export default class LSystem
 
         this.expansionRules = new Map();
 
-        let expandRuleF = new ExpansionRule("F", ["F", "F", "-",
-                                             "[", "-", "F", "+", 
-                                             "F", "]", "+", "[", 
-                                             "+", "F", "-", "F", "]"]);
+        let expandRuleF = new ExpansionRule("F", ["F", "F", "F",
+                                             "[", "-Z", "F", 
+                                             "F", "]", "[", 
+                                             "+Z", "F", "-Z", "F", "]"]);
         this.expansionRules.set("F", expandRuleF);
+        let expandRuleA = new ExpansionRule("A", ["F", "F", "+",
+                                             "[", "+", "F", "]", "+", 
+                                             "[", "F", "]", "+", "[", 
+                                             "+", "F", "-", "F", "]"]);
+        this.expansionRules.set("A", expandRuleA);
 
 
         this.currRecursionLevel = 1;
@@ -76,6 +82,8 @@ export default class LSystem
         this.currPos = vec4.fromValues(0.0, 0.0, 0.0, 1.0);
 
         this.currDirection = vec4.fromValues(0.0, 1.0, 0.0, 0.0);
+
+        this.currScale = 1.0;
     
         this.currTransformMat = mat4.create();
 
@@ -93,7 +101,7 @@ export default class LSystem
                                         mat4.create());
 
         this.turtleArr = [startingTurtle];
-        this.grammarString = ["F", "F", "-Z", "[", "-Z", "F", "+Z", 
+        this.grammarString = ["F", "A", "F", "-Z", "[", "-Z", "F", "+Z", 
                                 "F", "]", "+X", "[", "+Z", "F", "-Z", 
                                 "F", "]"];
         this.axiomString = "F";
@@ -319,17 +327,16 @@ export default class LSystem
 
 
     storeTurtle(): boolean
-    {
-        this.currRecursionLevel++;
+    {   
+        let currTransformMat: mat4 = mat4.create();
+        mat4.copy(currTransformMat, this.currTransformMat);
 
-        let scaleFactor: number = 1.0 - (this.currRecursionLevel / 500.0);
-        mat4.scale(this.currTransformMat, this.currTransformMat, 
-            vec3.fromValues(scaleFactor, scaleFactor, scaleFactor));
-        
         let newTurtle: Turtle = new Turtle(vec3.fromValues(this.currPos[0], this.currPos[1], this.currPos[2]), 
                                             vec3.fromValues(this.currDirection[0], this.currDirection[1], this.currDirection[2]), 
-                                                this.currRecursionLevel, this.currTransformMat);
+                                                this.currRecursionLevel, currTransformMat);
         this.turtleArr.push(newTurtle);
+
+        this.currRecursionLevel++;
 
         return false;
     }
