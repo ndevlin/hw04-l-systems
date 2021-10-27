@@ -6089,12 +6089,17 @@ let iterations = 1.0;
 let prevIterations = 1.0;
 let forwardLength = 3.0;
 let prevForwardLength = 3.0;
+let barkColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.4588, 0.2353, 0.1333, 1.0);
+let prevBarkColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.5, 0.25, 0.125, 1.0);
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
     Iterations: 1.0,
     Angle: PI / 8.0,
     ForwardLength: 3.0
+};
+const colorControl = {
+    BarkColor: [128, 64, 32]
 };
 let square;
 let cylinder;
@@ -6110,7 +6115,7 @@ function loadScene() {
     cube.create();
     screenQuad = new __WEBPACK_IMPORTED_MODULE_4__geometry_ScreenQuad__["a" /* default */]();
     screenQuad.create();
-    let lSystem = new __WEBPACK_IMPORTED_MODULE_10__LSystem__["a" /* default */](angle, iterations, forwardLength);
+    let lSystem = new __WEBPACK_IMPORTED_MODULE_10__LSystem__["a" /* default */](angle, iterations, forwardLength, barkColor);
     lSystem.expand();
     lSystem.computeDrawingData();
     let offsets = new Float32Array(lSystem.offsetsArray);
@@ -6138,6 +6143,7 @@ function main() {
     gui.add(controls, "Iterations", 0, 10).step(1);
     gui.add(controls, "Angle", -PI, PI).step(0.1);
     gui.add(controls, "ForwardLength", 1.0, 10.0).step(0.1);
+    gui.addColor(colorControl, 'BarkColor');
     // get canvas and webgl context
     const canvas = document.getElementById('canvas');
     const gl = canvas.getContext('webgl2');
@@ -6167,10 +6173,13 @@ function main() {
         iterations = controls.Iterations;
         angle = controls.Angle;
         forwardLength = controls.ForwardLength;
-        if (angle != prevAngle || iterations != prevIterations || forwardLength != prevForwardLength) {
+        barkColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(colorControl.BarkColor[0] / 256.0, colorControl.BarkColor[1] / 256.0, colorControl.BarkColor[2] / 256.0, 1.0);
+        if (angle != prevAngle || iterations != prevIterations
+            || forwardLength != prevForwardLength || barkColor != prevBarkColor) {
             prevAngle = angle;
             prevIterations = iterations;
             prevForwardLength = forwardLength;
+            prevBarkColor = barkColor;
             loadScene();
         }
         camera.update();
@@ -16768,7 +16777,7 @@ class Cylinder extends __WEBPACK_IMPORTED_MODULE_0__rendering_gl_Drawable__["a" 
 
 
 class LSystem {
-    constructor(angle, iterations, forwardLength) {
+    constructor(angle, iterations, forwardLength, barkColor) {
         this.drawRules = new Map();
         this.drawRules.set('F', this.moveForward.bind(this));
         this.drawRules.set('+Z', this.rotateLeftZ.bind(this));
@@ -16794,7 +16803,8 @@ class LSystem {
         this.theta = angle;
         this.numIterations = iterations;
         this.forwardLength = forwardLength;
-        this.theColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.4588, 0.2353, 0.1333, 1.0);
+        this.theColor = barkColor;
+        this.barkColor = barkColor;
         let startingTurtle = new __WEBPACK_IMPORTED_MODULE_3__Turtle__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 0.0, 0.0), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 1.0, 0.0), 1, __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create());
         this.turtleArr = [startingTurtle];
         this.grammarString = ["F", "+X", "+Z", "[", "A", "]",
@@ -16894,7 +16904,7 @@ class LSystem {
         this.currDirection = moveForwardRule.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, moveForwardRule.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, moveForwardRule.orientationMat);
-        this.theColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.4588, 0.2353, 0.1333, 1.0);
+        this.theColor = this.barkColor;
         return true;
     }
     rotateLeftZ() {
@@ -16905,7 +16915,7 @@ class LSystem {
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
-        this.theColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.4588, 0.2353, 0.1333, 1.0);
+        this.theColor = this.barkColor;
         return true;
     }
     rotateRightZ() {
@@ -16916,7 +16926,7 @@ class LSystem {
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
-        this.theColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.4588, 0.2353, 0.1333, 1.0);
+        this.theColor = this.barkColor;
         return true;
     }
     rotateLeftX() {
@@ -16927,7 +16937,7 @@ class LSystem {
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
-        this.theColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.4588, 0.2353, 0.1333, 1.0);
+        this.theColor = this.barkColor;
         return true;
     }
     rotateRightX() {
@@ -16938,7 +16948,7 @@ class LSystem {
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
-        this.theColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.4588, 0.2353, 0.1333, 1.0);
+        this.theColor = this.barkColor;
         return true;
     }
     rotateLeftY() {
@@ -16949,7 +16959,7 @@ class LSystem {
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
-        this.theColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.4588, 0.2353, 0.1333, 1.0);
+        this.theColor = this.barkColor;
         return true;
     }
     rotateRightY() {
@@ -16960,7 +16970,7 @@ class LSystem {
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
-        this.theColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.4588, 0.2353, 0.1333, 1.0);
+        this.theColor = this.barkColor;
         return true;
     }
     storeTurtle() {
@@ -16980,6 +16990,7 @@ class LSystem {
         this.currDirection = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(currTurDir[0], currTurDir[1], currTurDir[2], 1.0);
         this.currTransformMat = currTurtle.transform;
         this.currRecursionLevel = currTurtle.recursionDepth;
+        // Green: Leaf Color
         this.theColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.1647, 0.4863, 0.1373, 1.0);
         return false;
     }
