@@ -16755,14 +16755,20 @@ class LSystem {
         this.drawRules.set('[', this.storeTurtle.bind(this));
         this.drawRules.set(']', this.loadTurtle.bind(this));
         this.expansionRules = new Map();
-        let expandRuleF = new __WEBPACK_IMPORTED_MODULE_1__ExpansionRule__["a" /* default */]("F", ["F", "F", "-",
-            "[", "-", "F", "+",
-            "F", "]", "+", "[",
-            "+", "F", "-", "F", "]"]);
+        let expandRuleF = new __WEBPACK_IMPORTED_MODULE_1__ExpansionRule__["a" /* default */]("F", ["F", "F", "F",
+            "[", "-Z", "F",
+            "F", "]", "[",
+            "+Z", "F", "-Z", "F", "]"]);
         this.expansionRules.set("F", expandRuleF);
+        let expandRuleA = new __WEBPACK_IMPORTED_MODULE_1__ExpansionRule__["a" /* default */]("A", ["F", "F", "+",
+            "[", "+", "F", "]", "+",
+            "[", "F", "]", "+", "[",
+            "+", "F", "-", "F", "]"]);
+        this.expansionRules.set("A", expandRuleA);
         this.currRecursionLevel = 1;
         this.currPos = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.0, 0.0, 0.0, 1.0);
         this.currDirection = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.0, 1.0, 0.0, 0.0);
+        this.currScale = 1.0;
         this.currTransformMat = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
         this.theta = angle;
         this.numIterations = iterations;
@@ -16770,7 +16776,7 @@ class LSystem {
         this.theColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.4588, 0.2353, 0.1333, 1.0);
         let startingTurtle = new __WEBPACK_IMPORTED_MODULE_3__Turtle__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 0.0, 0.0), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 1.0, 0.0), 1, __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create());
         this.turtleArr = [startingTurtle];
-        this.grammarString = ["F", "F", "-Z", "[", "-Z", "F", "+Z",
+        this.grammarString = ["F", "A", "F", "-Z", "[", "-Z", "F", "+Z",
             "F", "]", "+X", "[", "+Z", "F", "-Z",
             "F", "]"];
         this.axiomString = "F";
@@ -16935,11 +16941,11 @@ class LSystem {
         return true;
     }
     storeTurtle() {
-        this.currRecursionLevel++;
-        let scaleFactor = 1.0 - (this.currRecursionLevel / 500.0);
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].scale(this.currTransformMat, this.currTransformMat, __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(scaleFactor, scaleFactor, scaleFactor));
-        let newTurtle = new __WEBPACK_IMPORTED_MODULE_3__Turtle__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(this.currPos[0], this.currPos[1], this.currPos[2]), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(this.currDirection[0], this.currDirection[1], this.currDirection[2]), this.currRecursionLevel, this.currTransformMat);
+        let currTransformMat = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].copy(currTransformMat, this.currTransformMat);
+        let newTurtle = new __WEBPACK_IMPORTED_MODULE_3__Turtle__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(this.currPos[0], this.currPos[1], this.currPos[2]), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(this.currDirection[0], this.currDirection[1], this.currDirection[2]), this.currRecursionLevel, currTransformMat);
         this.turtleArr.push(newTurtle);
+        this.currRecursionLevel++;
         return false;
     }
     loadTurtle(posIn, directionIn, transformMat, currRecursionDepth) {
