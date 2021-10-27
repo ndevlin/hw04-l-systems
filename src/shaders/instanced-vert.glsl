@@ -12,6 +12,8 @@ in vec4 vs_Col; // An instanced rendering attribute; each particle instance has 
 in vec3 vs_Translate; // Another instance rendering attribute used to position each quad instance in the scene
 in vec2 vs_UV; // Non-instanced, and presently unused in main(). Feel free to use it for your meshes.
 
+in float vs_Scale;
+
 // The transformation matrix in the form of 4 vec4s
 in vec4 vs_matCol0;
 in vec4 vs_matCol1;
@@ -26,6 +28,8 @@ out vec4 fs_matCol3;
 out vec4 fs_Col;
 out vec4 fs_Pos;
 
+out float fs_Scale;
+
 out vec4 fs_Nor;
 
 void main()
@@ -34,6 +38,8 @@ void main()
     fs_Pos = vs_Pos;
 
     fs_Nor = vs_Nor;
+
+    fs_Scale = vs_Scale;
 
     fs_matCol0 = vs_matCol0;
     fs_matCol1 = vs_matCol1;
@@ -50,8 +56,12 @@ void main()
                             vs_matCol2,
                             vs_matCol3);
 
+    vec4 newPos = vec4(1.0, 1.0, 1.0, 1.0);
+    newPos = vs_Pos * vs_Scale;
+    newPos[1] = vs_Pos[1];
+    newPos[3] = 1.0;
 
-    vec4 newPos = vec4(vec3(transformMat * vs_Pos) + offset, 1.0);
+    newPos = vec4(vec3(transformMat * newPos) + offset, 1.0);
 
     gl_Position = u_ViewProj * newPos;
 

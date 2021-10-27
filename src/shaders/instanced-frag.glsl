@@ -6,6 +6,8 @@ in vec4 fs_Pos;
 
 in vec4 fs_Nor;
 
+in float fs_Scale;
+
 in vec4 fs_matCol0;
 in vec4 fs_matCol1;
 in vec4 fs_matCol2;
@@ -19,6 +21,8 @@ void main()
     //out_Col = vec4(dist) * fs_Col;
 
     out_Col = fs_Col;
+
+    //out_Col = vec4(fs_Scale / 1.0, 0.0, 0.0, 1.0);
 
     //out_Col = vec4(0.1647, 0.4863, 0.1373, 1.0);
 }

@@ -58,6 +58,8 @@ function loadScene() {
   let offsets: Float32Array = new Float32Array(lSystem.offsetsArray);
   let colors: Float32Array = new Float32Array(lSystem.colorsArray);
 
+  let scale: Float32Array = new Float32Array(lSystem.scaleArray);
+
   let col0Out: Float32Array = new Float32Array(lSystem.col0);
   let col1Out: Float32Array = new Float32Array(lSystem.col1);
   let col2Out: Float32Array = new Float32Array(lSystem.col2);
@@ -66,7 +68,7 @@ function loadScene() {
   //square.setInstanceVBOs(offsets, colors);
   //square.setNumInstances(lSystem.numCylinders); // grid of "particles"
 
-  cylinder.setInstanceVBOs(offsets, colors, col0Out, col1Out, col2Out, col3Out);
+  cylinder.setInstanceVBOs(scale, offsets, colors, col0Out, col1Out, col2Out, col3Out);
   cylinder.setNumInstances(lSystem.numCylinders); // grid of "particles"
 }
 

@@ -27,6 +27,7 @@ export default class LSystem
     // Set up instanced rendering data arrays here.
     offsetsArray: number[];
     colorsArray: number[];
+    scaleArray: number[];
 
     // The transformation matrix to pass to the instancing shader
     col0: number[];
@@ -109,6 +110,7 @@ export default class LSystem
 
         this.offsetsArray = [];
         this.colorsArray = [];
+        this.scaleArray = [];
 
         this.col0 = [];
         this.col1 = [];
@@ -153,6 +155,8 @@ export default class LSystem
         this.offsetsArray.push(0.0);
         this.offsetsArray.push(0.0);
         this.offsetsArray.push(0.0);
+
+        this.scaleArray.push(1.0);
 
         this.col0.push(1.0);
         this.col0.push(0.0);
@@ -209,6 +213,9 @@ export default class LSystem
                 this.offsetsArray.push(this.currPos[0]);
                 this.offsetsArray.push(this.currPos[1]);
                 this.offsetsArray.push(this.currPos[2]);
+
+                this.scaleArray.push(this.currScale);
+
                 this.numCylinders++;
             }
 
@@ -337,6 +344,8 @@ export default class LSystem
         this.turtleArr.push(newTurtle);
 
         this.currRecursionLevel++;
+
+        this.currScale = 1.0 - (this.currRecursionLevel / 5.0);
 
         return false;
     }

@@ -11,6 +11,8 @@ class Cylinder extends Drawable {
   colors: Float32Array;
   offsets: Float32Array; // Data for bufTranslate
 
+  scale: Float32Array;
+
   normals: Float32Array;
 
   matCol0: Float32Array;
@@ -104,6 +106,8 @@ class Cylinder extends Drawable {
 
     this.generateTranslate();
 
+    this.generateScale();
+
     this.generateMatCol0();
     this.generateMatCol1();
     this.generateMatCol2();
@@ -123,7 +127,8 @@ class Cylinder extends Drawable {
     console.log(`Created Cube`);
   }
 
-  setInstanceVBOs(offsets: Float32Array, 
+  setInstanceVBOs(scale: Float32Array,
+                  offsets: Float32Array, 
                   colors: Float32Array,
                   matCol0In: Float32Array,
                   matCol1In: Float32Array,
@@ -132,6 +137,8 @@ class Cylinder extends Drawable {
   {
     this.colors = colors;
     this.offsets = offsets;
+
+    this.scale = scale;
 
     this.matCol0 = matCol0In;
     this.matCol1 = matCol1In;
@@ -142,6 +149,9 @@ class Cylinder extends Drawable {
     gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.bufTranslate);
     gl.bufferData(gl.ARRAY_BUFFER, this.offsets, gl.STATIC_DRAW);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.bufScale);
+    gl.bufferData(gl.ARRAY_BUFFER, this.scale, gl.STATIC_DRAW);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.bufMatCol0);
     gl.bufferData(gl.ARRAY_BUFFER, this.matCol0, gl.STATIC_DRAW);
