@@ -6073,11 +6073,14 @@ let angle = PI / 8.0;
 let prevAngle = angle;
 let iterations = 3.0;
 let prevIterations = 3.0;
+let forwardLength = 3.0;
+let prevForwardLength = 3.0;
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
     Iterations: 3.0,
-    Angle: PI / 8.0
+    Angle: PI / 8.0,
+    ForwardLength: 3.0
 };
 let square;
 let cube;
@@ -6090,7 +6093,7 @@ function loadScene() {
     cube.create();
     screenQuad = new __WEBPACK_IMPORTED_MODULE_4__geometry_ScreenQuad__["a" /* default */]();
     screenQuad.create();
-    let lSystem = new __WEBPACK_IMPORTED_MODULE_10__LSystem__["a" /* default */](angle, iterations);
+    let lSystem = new __WEBPACK_IMPORTED_MODULE_10__LSystem__["a" /* default */](angle, iterations, forwardLength);
     lSystem.expand();
     lSystem.computeDrawingData();
     let offsets = new Float32Array(lSystem.offsetsArray);
@@ -6116,6 +6119,7 @@ function main() {
     const gui = new __WEBPACK_IMPORTED_MODULE_2_dat_gui__["GUI"]();
     gui.add(controls, "Iterations", 0, 10).step(1);
     gui.add(controls, "Angle", -PI, PI).step(0.1);
+    gui.add(controls, "ForwardLength", 1.0, 10.0).step(0.1);
     // get canvas and webgl context
     const canvas = document.getElementById('canvas');
     const gl = canvas.getContext('webgl2');
@@ -6144,9 +6148,11 @@ function main() {
     function tick() {
         iterations = controls.Iterations;
         angle = controls.Angle;
-        if (angle != prevAngle || iterations != prevIterations) {
+        forwardLength = controls.ForwardLength;
+        if (angle != prevAngle || iterations != prevIterations || forwardLength != prevForwardLength) {
             prevAngle = angle;
             prevIterations = iterations;
+            prevForwardLength = forwardLength;
             loadScene();
         }
         camera.update();
@@ -16757,7 +16763,7 @@ class Cube extends __WEBPACK_IMPORTED_MODULE_1__rendering_gl_Drawable__["a" /* d
 
 
 class LSystem {
-    constructor(angle, iterations) {
+    constructor(angle, iterations, forwardLength) {
         this.drawRules = new Map();
         this.drawRules.set('F', this.moveForward.bind(this));
         this.drawRules.set('+Z', this.rotateLeftZ.bind(this));
@@ -16780,6 +16786,7 @@ class LSystem {
         this.currTransformMat = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
         this.theta = angle;
         this.numIterations = iterations;
+        this.forwardLength = forwardLength;
         let startingTurtle = new __WEBPACK_IMPORTED_MODULE_3__Turtle__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 0.0, 0.0), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 1.0, 0.0), 1, __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create());
         this.turtleArr = [startingTurtle];
         this.grammarString = ["F", "F", "-Z", "[", "-Z", "F", "+Z",
@@ -16875,7 +16882,7 @@ class LSystem {
     }
     moveForward() {
         let straight = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
-        let moveForwardRule = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](4.0, straight);
+        let moveForwardRule = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](this.forwardLength, straight);
         this.currDirection = moveForwardRule.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, moveForwardRule.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, moveForwardRule.orientationMat);
@@ -16885,7 +16892,7 @@ class LSystem {
         let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 0.0, 1.0);
         let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, this.theta, zAxis);
-        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](4.0, rotAboutZ);
+        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](this.forwardLength, rotAboutZ);
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
@@ -16895,7 +16902,7 @@ class LSystem {
         let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 0.0, 1.0);
         let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, -this.theta, zAxis);
-        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](4.0, rotAboutZ);
+        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](this.forwardLength, rotAboutZ);
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
@@ -16905,7 +16912,7 @@ class LSystem {
         let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(1.0, 0.0, 0.0);
         let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, this.theta, zAxis);
-        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](4.0, rotAboutZ);
+        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](this.forwardLength, rotAboutZ);
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
@@ -16915,7 +16922,7 @@ class LSystem {
         let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(1.0, 0.0, 0.0);
         let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, -this.theta, zAxis);
-        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](4.0, rotAboutZ);
+        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](this.forwardLength, rotAboutZ);
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
@@ -16925,7 +16932,7 @@ class LSystem {
         let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 1.0, 0.0);
         let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, this.theta, zAxis);
-        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](4.0, rotAboutZ);
+        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](this.forwardLength, rotAboutZ);
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
@@ -16935,7 +16942,7 @@ class LSystem {
         let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 1.0, 0.0);
         let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, -this.theta, zAxis);
-        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](4.0, rotAboutZ);
+        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](this.forwardLength, rotAboutZ);
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
