@@ -30,7 +30,9 @@ void main()
 
     vec3 offset = vs_Translate;
 
+    gl_Position = u_ViewProj * (vs_Pos + vec4(vs_Translate, 0.0));
+
     //offset.z = (sin((u_Time + offset.x) * 3.14159 * 0.1) + cos((u_Time + offset.y) * 3.14159 * 0.1)) * 1.5;
-    vec3 billboardPos = offset + vs_Pos.x * u_CameraAxes[0] + vs_Pos.y * u_CameraAxes[1];
-    gl_Position = u_ViewProj * vec4(billboardPos, 1.0);
+    //vec3 billboardPos = offset + vs_Pos.x * u_CameraAxes[0] + vs_Pos.y * u_CameraAxes[1];
+    //gl_Position = u_ViewProj * vec4(billboardPos, 1.0);
 }

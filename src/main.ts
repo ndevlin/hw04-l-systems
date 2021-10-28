@@ -176,6 +176,7 @@ function main() {
 
     renderer.render(camera, instancedShader, [cylinder,]);
 
+
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame

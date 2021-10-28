@@ -24,8 +24,7 @@ Drawing Rule, Cylinder, ScreenQuad, Drawable, OpenGLRenderer, and ShaderProgram 
 
 Function pointers are used to connect LSystem rules to Drawing operations. When a Drawing operation is selected, say a rotation about the Z axis, a transfomation matrix is calculated and multiplied by the current transformation at this position. Once the transformations and offsets required to draw this geometry at the appropriate location and orientation are calculated and concatenated, the resulting matrix is split into 4 vectors which are then passed into the vertex shader to reposition the instanced geometry.
 
-The LSystem creates rotation about the X, Y, and Z axes to create a 3-Dimensional form. At the moment, ends of LSystem segments are colored green to indicate leaves. The angle is controlled by the user, but a random offset is also added to give some organic variation. 
-
+The LSystem creates rotation about the X, Y, and Z axes to create a 3-Dimensional form. The system also draws leaves in the form of green squares. I would like to add a texture so as to draw a leaf image on top of these squares later. The angle is controlled by the user, but a random offset is also added to give some organic variation. 
 
 The background is created by mixing Fractal Brownian Noise, which creates a cloud effect, with a sunset gradient created according to the pixel y coordinates. 
 
