@@ -16793,18 +16793,18 @@ class LSystem {
         this.drawRules.set(']', this.loadTurtle.bind(this));
         this.expansionRules = new Map();
         let expandStringF_1 = ["F", "A", "-Z", "+X",
-            "[", "+X", "-Z", "F", "-X", "+Z", "F", "]",
-            "+Z", "[", "-X", "+Z", "F", "+X", "-Z", "F", "]"];
+            "[", "+X", "-Z", "F", "-X", "+Z", "F", "L", "]",
+            "+Z", "[", "-X", "+Z", "F", "+X", "-Z", "F", "L", "]"];
         let expandStringF_2 = ["F", "A", "+Z",
-            "[", "+X", "-Z", "F", "-X", "+Z", "F", "]", "-Z"];
+            "[", "+X", "-Z", "F", "-X", "+Z", "F", "L", "]", "-Z"];
         let expandRuleF = new __WEBPACK_IMPORTED_MODULE_1__ExpansionRule__["a" /* default */]("F");
         this.expansionRules.set("F", expandRuleF);
         expandRuleF.addExpansion(expandStringF_1, 0.4);
         expandRuleF.addExpansion(expandStringF_2, 0.6);
-        let expandStringA_1 = ["F", "+Z", "-X", "A", "[", "+Z", "-X", "F", "]",
-            "-Z", "+X"];
-        let expandStringA_2 = ["F", "+X", "+Z", "A", "[", "+Z", "-X", "F", "]",
-            "-Z", "-X"];
+        let expandStringA_1 = ["F", "+Z", "-X", "A", "[", "+Z",
+            "-X", "F", "L", "]", "-Z", "+X"];
+        let expandStringA_2 = ["F", "+X", "+Z", "A", "[", "+Z",
+            "-X", "F", "L", "]", "-Z", "-X"];
         let expandRuleA = new __WEBPACK_IMPORTED_MODULE_1__ExpansionRule__["a" /* default */]("A");
         this.expansionRules.set("A", expandRuleA);
         expandRuleA.addExpansion(expandStringA_1, 0.6);
@@ -16878,6 +16878,10 @@ class LSystem {
         for (let c in this.grammarString) {
             let draw = true;
             let currString = this.grammarString[c];
+            if (currString == "L") {
+                // Green: Leaf Color
+                this.theColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.1647, 0.4863, 0.1373, 1.0);
+            }
             let func = this.drawRules.get(currString);
             if (func) {
                 draw = func();
@@ -17008,8 +17012,6 @@ class LSystem {
         this.currDirection = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(currTurDir[0], currTurDir[1], currTurDir[2], 1.0);
         this.currTransformMat = currTurtle.transform;
         this.currRecursionLevel = currTurtle.recursionDepth;
-        // Green: Leaf Color
-        this.theColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.1647, 0.4863, 0.1373, 1.0);
         return false;
     }
 }
