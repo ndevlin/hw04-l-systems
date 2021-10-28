@@ -68,22 +68,22 @@ export default class LSystem
         this.expansionRules = new Map();
 
         let expandStringF_1: string[] = ["F", "A", "-Z", "+X",
-        "[", "+X", "-Z", "F", "-X", "+Z", "F", "]", 
-        "+Z", "[", "-X", "+Z", "F", "+X", "-Z", "F", "]"];
+        "[", "+X", "-Z", "F", "-X", "+Z", "F", "L", "]", 
+        "+Z", "[", "-X", "+Z", "F", "+X", "-Z", "F", "L", "]"];
 
         let expandStringF_2: string[] = ["F", "A", "+Z",
-        "[", "+X", "-Z", "F", "-X", "+Z", "F", "]", "-Z"];
+        "[", "+X", "-Z", "F", "-X", "+Z", "F", "L", "]", "-Z"];
 
         let expandRuleF = new ExpansionRule("F");
         this.expansionRules.set("F", expandRuleF);
         expandRuleF.addExpansion(expandStringF_1, 0.4);
         expandRuleF.addExpansion(expandStringF_2, 0.6);
 
-        let expandStringA_1: string[] = ["F", "+Z", "-X", "A", "[", "+Z", "-X", "F", "]",
-         "-Z", "+X"]
+        let expandStringA_1: string[] = ["F", "+Z", "-X", "A", "[", "+Z", 
+        "-X", "F", "L", "]", "-Z", "+X"]
 
-        let expandStringA_2: string[] = ["F", "+X", "+Z", "A", "[", "+Z", "-X", "F", "]",
-        "-Z", "-X"]
+        let expandStringA_2: string[] = ["F", "+X", "+Z", "A", "[", "+Z", 
+        "-X", "F", "L", "]", "-Z", "-X"]
 
         let expandRuleA = new ExpansionRule("A");
         this.expansionRules.set("A", expandRuleA);
@@ -197,6 +197,13 @@ export default class LSystem
         {
             let draw: boolean = true;
             let currString: string = this.grammarString[c];
+
+            if(currString == "L")
+            {
+                // Green: Leaf Color
+                this.theColor = vec4.fromValues(0.1647, 0.4863, 0.1373, 1.0);
+            }
+
             let func = this.drawRules.get(currString);
             if(func)
             {
@@ -390,9 +397,6 @@ export default class LSystem
     
         this.currTransformMat = currTurtle.transform;
         this.currRecursionLevel = currTurtle.recursionDepth;
-
-        // Green: Leaf Color
-        this.theColor = vec4.fromValues(0.1647, 0.4863, 0.1373, 1.0);
 
         return false;
     }
