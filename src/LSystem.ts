@@ -8,7 +8,6 @@ export default class LSystem
 {
     grammarString: string[];
     turtleArr: Turtle[];
-    axiomString: string;
     currTurtle: number;
 
     currPos: vec4;
@@ -68,12 +67,28 @@ export default class LSystem
 
         this.expansionRules = new Map();
 
-        let expandRuleF = new ExpansionRule("F", ["F", "F", "F", "-Z",
-                                             "[", "+X", "-Z", "F", "-X", "+Z", "F", "]", 
-                                             "+Z", "[", "-X", "+Z", "F", "+X", "-Z", "F", "]"]);
+        let expandStringF_1: string[] = ["F", "A", "-Z", "+X",
+        "[", "+X", "-Z", "F", "-X", "+Z", "F", "]", 
+        "+Z", "[", "-X", "+Z", "F", "+X", "-Z", "F", "]"];
+
+        let expandStringF_2: string[] = ["F", "A", "+Z",
+        "[", "+X", "-Z", "F", "-X", "+Z", "F", "]", "-Z"];
+
+        let expandRuleF = new ExpansionRule("F");
         this.expansionRules.set("F", expandRuleF);
-        let expandRuleA = new ExpansionRule("A", ["F", "F", "+Z", "-X", "[", "+Z", "-X", "F", "]", "-Z", "+X", "[", "+X", "-Z", "F", "]"]);
+        expandRuleF.addExpansion(expandStringF_1, 0.4);
+        expandRuleF.addExpansion(expandStringF_2, 0.6);
+
+        let expandStringA_1: string[] = ["F", "+Z", "-X", "A", "[", "+Z", "-X", "F", "]",
+         "-Z", "+X"]
+
+        let expandStringA_2: string[] = ["F", "+X", "+Z", "A", "[", "+Z", "-X", "F", "]",
+        "-Z", "-X"]
+
+        let expandRuleA = new ExpansionRule("A");
         this.expansionRules.set("A", expandRuleA);
+        expandRuleA.addExpansion(expandStringA_1, 0.6);
+        expandRuleA.addExpansion(expandStringA_2, 0.4);
 
 
         this.currRecursionLevel = 1;
@@ -102,9 +117,8 @@ export default class LSystem
                                         mat4.create());
 
         this.turtleArr = [startingTurtle];
-        this.grammarString = ["F", "+X", "+Z", "[", "A", "]", 
-                                "-Z", "-X", "[", "A", "]"];
-        this.axiomString = "F";
+        this.grammarString = ["F", "A", "["];
+
         this.currTurtle = 0;
 
         this.offsetsArray = [];
@@ -131,7 +145,9 @@ export default class LSystem
                 let currRule = this.expansionRules.get(this.grammarString[c]);
                 if(currRule)
                 {
-                    stringArr = currRule.outputString;
+                    let randVal: number = Math.random();
+                    stringArr = currRule.returnRandExpansion(randVal);
+
                     for(let s in stringArr)
                     {
                         outStringArr.push(stringArr[s]);
@@ -243,7 +259,10 @@ export default class LSystem
     {
         let zAxis: vec3 = vec3.fromValues(0.0, 0.0, 1.0);
         let rotAboutZ = mat4.create();
-        mat4.fromRotation(rotAboutZ, this.theta, zAxis);
+
+        let rotAngle = this.theta + Math.random() / 10.0;
+
+        mat4.fromRotation(rotAboutZ, rotAngle, zAxis);
         let rotateAboutZ = new DrawingRule(this.forwardLength, rotAboutZ);
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
@@ -258,7 +277,10 @@ export default class LSystem
     {
         let zAxis: vec3 = vec3.fromValues(0.0, 0.0, 1.0);
         let rotAboutZ = mat4.create();
-        mat4.fromRotation(rotAboutZ, -this.theta, zAxis);
+
+        let rotAngle = this.theta + Math.random() / 10.0;
+
+        mat4.fromRotation(rotAboutZ, -rotAngle, zAxis);
         let rotateAboutZ = new DrawingRule(this.forwardLength, rotAboutZ);
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
@@ -272,13 +294,16 @@ export default class LSystem
 
     rotateLeftX(): boolean
     {
-        let zAxis: vec3 = vec3.fromValues(1.0, 0.0, 0.0);
-        let rotAboutZ = mat4.create();
-        mat4.fromRotation(rotAboutZ, this.theta, zAxis);
-        let rotateAboutZ = new DrawingRule(this.forwardLength, rotAboutZ);
-        this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
-        vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
-        mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
+        let xAxis: vec3 = vec3.fromValues(1.0, 0.0, 0.0);
+        let rotAboutX = mat4.create();
+
+        let rotAngle = this.theta + Math.random() / 10.0;
+
+        mat4.fromRotation(rotAboutX, rotAngle, xAxis);
+        let rotateAboutX = new DrawingRule(this.forwardLength, rotAboutX);
+        this.currDirection = rotateAboutX.returnNewDirection(this.currDirection);
+        vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutX.forwardAmount);
+        mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutX.orientationMat);
 
         this.theColor = this.barkColor;
 
@@ -287,13 +312,16 @@ export default class LSystem
 
     rotateRightX(): boolean
     {
-        let zAxis: vec3 = vec3.fromValues(1.0, 0.0, 0.0);
-        let rotAboutZ = mat4.create();
-        mat4.fromRotation(rotAboutZ, -this.theta, zAxis);
-        let rotateAboutZ = new DrawingRule(this.forwardLength, rotAboutZ);
-        this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
-        vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
-        mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
+        let xAxis: vec3 = vec3.fromValues(1.0, 0.0, 0.0);
+        let rotAboutX = mat4.create();
+
+        let rotAngle = this.theta + Math.random() / 10.0;
+
+        mat4.fromRotation(rotAboutX, -rotAngle, xAxis);
+        let rotateAboutX = new DrawingRule(this.forwardLength, rotAboutX);
+        this.currDirection = rotateAboutX.returnNewDirection(this.currDirection);
+        vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutX.forwardAmount);
+        mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutX.orientationMat);
         
         this.theColor = this.barkColor;
 
@@ -303,13 +331,16 @@ export default class LSystem
 
     rotateLeftY(): boolean
     {
-        let zAxis: vec3 = vec3.fromValues(0.0, 1.0, 0.0);
-        let rotAboutZ = mat4.create();
-        mat4.fromRotation(rotAboutZ, this.theta, zAxis);
-        let rotateAboutZ = new DrawingRule(this.forwardLength, rotAboutZ);
-        this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
-        vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
-        mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
+        let yAxis: vec3 = vec3.fromValues(0.0, 1.0, 0.0);
+        let rotAboutY = mat4.create();
+
+        let rotAngle = this.theta + Math.random() / 10.0;
+
+        mat4.fromRotation(rotAboutY, rotAngle, yAxis);
+        let rotateAboutY = new DrawingRule(this.forwardLength, rotAboutY);
+        this.currDirection = rotateAboutY.returnNewDirection(this.currDirection);
+        vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutY.forwardAmount);
+        mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutY.orientationMat);
         
         this.theColor = this.barkColor;
         return true;
@@ -317,13 +348,13 @@ export default class LSystem
 
     rotateRightY(): boolean
     {
-        let zAxis: vec3 = vec3.fromValues(0.0, 1.0, 0.0);
-        let rotAboutZ = mat4.create();
-        mat4.fromRotation(rotAboutZ, -this.theta, zAxis);
-        let rotateAboutZ = new DrawingRule(this.forwardLength, rotAboutZ);
-        this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
-        vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
-        mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
+        let yAxis: vec3 = vec3.fromValues(0.0, 1.0, 0.0);
+        let rotAboutY = mat4.create();
+        mat4.fromRotation(rotAboutY, -this.theta, yAxis);
+        let rotateAboutY = new DrawingRule(this.forwardLength, rotAboutY);
+        this.currDirection = rotateAboutY.returnNewDirection(this.currDirection);
+        vec4.scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutY.forwardAmount);
+        mat4.mul(this.currTransformMat, this.currTransformMat, rotateAboutY.orientationMat);
         
         this.theColor = this.barkColor;
 
@@ -343,7 +374,7 @@ export default class LSystem
 
         this.currRecursionLevel++;
 
-        this.currScale = 1.0 - (this.currRecursionLevel / 5.0);
+        this.currScale = 1.0 / (this.currRecursionLevel);
 
         return false;
     }

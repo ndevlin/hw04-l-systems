@@ -31,7 +31,7 @@ let prevBarkColor: vec4 = vec4.fromValues(0.5, 0.25, 0.125, 1.0);
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = 
 {
-  Iterations: 2.0,
+  Iterations: 1.0,
   Angle: PI / 8.0,
   ForwardLength: 3.0
 };
@@ -93,8 +93,8 @@ function main() {
   // Add controls to the gui
   const gui = new DAT.GUI();
 
-  gui.add(controls, "Iterations", 0, 10).step(1);
-  gui.add(controls, "Angle", -PI, PI).step(0.1);
+  gui.add(controls, "Iterations", 0, 5).step(1);
+  gui.add(controls, "Angle", -PI / 8.0, PI / 8.0).step(0.01);
   gui.add(controls, "ForwardLength", 1.0, 10.0).step(0.1);
 
   gui.addColor(colorControl, 'BarkColor');
@@ -142,8 +142,12 @@ function main() {
                                 colorControl.BarkColor[1] / 256.0,
                                 colorControl.BarkColor[2] / 256.0, 1.0);
 
+    let barkColorDifference: number = Math.abs(barkColor[0] - prevBarkColor[0])
+                                    + Math.abs(barkColor[1] - prevBarkColor[1])
+                                    + Math.abs(barkColor[2] - prevBarkColor[2]);
+
     if(angle != prevAngle || iterations != prevIterations 
-      || forwardLength != prevForwardLength || barkColor != prevBarkColor)
+      || forwardLength != prevForwardLength || barkColorDifference > 0.1)
     {
       prevAngle = angle;
       prevIterations = iterations;
