@@ -225,9 +225,9 @@ export default class LSystem
                 this.col3.push(this.currTransformMat[14]);
                 this.col3.push(this.currTransformMat[15]);
 
-                this.offsetsArray.push(this.currPos[0]);
-                this.offsetsArray.push(this.currPos[1]);
-                this.offsetsArray.push(this.currPos[2]);
+                this.offsetsArray.push(this.currPos[0] - this.currDirection[0] * 0.5);
+                this.offsetsArray.push(this.currPos[1] - this.currDirection[1] * 0.5);
+                this.offsetsArray.push(this.currPos[2] - this.currDirection[2] * 0.5);
 
                 this.scaleArray.push(this.currScale);
 

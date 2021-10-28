@@ -20,8 +20,8 @@ let prevAngle = angle;
 let iterations = 2.0;
 let prevIterations = 2.0;
 
-let forwardLength = 3.0;
-let prevForwardLength = 3.0;
+let forwardLength = 2.0;
+let prevForwardLength = 2.0;
 
 let barkColor: vec4 = vec4.fromValues(0.4588, 0.2353, 0.1333, 1.0);
 let prevBarkColor: vec4 = vec4.fromValues(0.5, 0.25, 0.125, 1.0);
@@ -33,7 +33,7 @@ const controls =
 {
   Iterations: 1.0,
   Angle: PI / 8.0,
-  ForwardLength: 3.0
+  ForwardLength: 2.0
 };
 
 const colorControl = 
@@ -51,7 +51,7 @@ let time: number = 0.0;
 function loadScene() {
   square = new Square();
   square.create();
-  cylinder = new Cylinder();
+  cylinder = new Cylinder(forwardLength);
   cylinder.create();
   cube = new Cube();
   cube.create();
@@ -95,7 +95,7 @@ function main() {
 
   gui.add(controls, "Iterations", 0, 5).step(1);
   gui.add(controls, "Angle", -PI / 8.0, PI / 8.0).step(0.01);
-  gui.add(controls, "ForwardLength", 1.0, 10.0).step(0.1);
+  gui.add(controls, "ForwardLength", 0.1, 10.0).step(0.1);
 
   gui.addColor(colorControl, 'BarkColor');
 

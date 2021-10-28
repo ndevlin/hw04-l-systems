@@ -22,10 +22,10 @@ class Cylinder extends Drawable {
 
   height: number;
 
-  constructor() 
+  constructor(height: number) 
   {
       super(); // Call the constructor of the super class.
-      this.height = 4.0;
+      this.height = height;
   }
 
   create() 
