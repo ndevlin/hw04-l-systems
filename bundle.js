@@ -6094,7 +6094,7 @@ let prevBarkColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].from
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
-    Iterations: 2.0,
+    Iterations: 1.0,
     Angle: PI / 8.0,
     ForwardLength: 3.0
 };
@@ -6140,8 +6140,8 @@ function main() {
     document.body.appendChild(stats.domElement);
     // Add controls to the gui
     const gui = new __WEBPACK_IMPORTED_MODULE_2_dat_gui__["GUI"]();
-    gui.add(controls, "Iterations", 0, 10).step(1);
-    gui.add(controls, "Angle", -PI, PI).step(0.1);
+    gui.add(controls, "Iterations", 0, 5).step(1);
+    gui.add(controls, "Angle", -PI / 8.0, PI / 8.0).step(0.01);
     gui.add(controls, "ForwardLength", 1.0, 10.0).step(0.1);
     gui.addColor(colorControl, 'BarkColor');
     // get canvas and webgl context
@@ -6174,8 +6174,11 @@ function main() {
         angle = controls.Angle;
         forwardLength = controls.ForwardLength;
         barkColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(colorControl.BarkColor[0] / 256.0, colorControl.BarkColor[1] / 256.0, colorControl.BarkColor[2] / 256.0, 1.0);
+        let barkColorDifference = Math.abs(barkColor[0] - prevBarkColor[0])
+            + Math.abs(barkColor[1] - prevBarkColor[1])
+            + Math.abs(barkColor[2] - prevBarkColor[2]);
         if (angle != prevAngle || iterations != prevIterations
-            || forwardLength != prevForwardLength || barkColor != prevBarkColor) {
+            || forwardLength != prevForwardLength || barkColorDifference > 0.1) {
             prevAngle = angle;
             prevIterations = iterations;
             prevForwardLength = forwardLength;
@@ -16789,12 +16792,23 @@ class LSystem {
         this.drawRules.set('[', this.storeTurtle.bind(this));
         this.drawRules.set(']', this.loadTurtle.bind(this));
         this.expansionRules = new Map();
-        let expandRuleF = new __WEBPACK_IMPORTED_MODULE_1__ExpansionRule__["a" /* default */]("F", ["F", "F", "F", "-Z",
+        let expandStringF_1 = ["F", "A", "-Z", "+X",
             "[", "+X", "-Z", "F", "-X", "+Z", "F", "]",
-            "+Z", "[", "-X", "+Z", "F", "+X", "-Z", "F", "]"]);
+            "+Z", "[", "-X", "+Z", "F", "+X", "-Z", "F", "]"];
+        let expandStringF_2 = ["F", "A", "+Z",
+            "[", "+X", "-Z", "F", "-X", "+Z", "F", "]", "-Z"];
+        let expandRuleF = new __WEBPACK_IMPORTED_MODULE_1__ExpansionRule__["a" /* default */]("F");
         this.expansionRules.set("F", expandRuleF);
-        let expandRuleA = new __WEBPACK_IMPORTED_MODULE_1__ExpansionRule__["a" /* default */]("A", ["F", "F", "+Z", "-X", "[", "+Z", "-X", "F", "]", "-Z", "+X", "[", "+X", "-Z", "F", "]"]);
+        expandRuleF.addExpansion(expandStringF_1, 0.4);
+        expandRuleF.addExpansion(expandStringF_2, 0.6);
+        let expandStringA_1 = ["F", "+Z", "-X", "A", "[", "+Z", "-X", "F", "]",
+            "-Z", "+X"];
+        let expandStringA_2 = ["F", "+X", "+Z", "A", "[", "+Z", "-X", "F", "]",
+            "-Z", "-X"];
+        let expandRuleA = new __WEBPACK_IMPORTED_MODULE_1__ExpansionRule__["a" /* default */]("A");
         this.expansionRules.set("A", expandRuleA);
+        expandRuleA.addExpansion(expandStringA_1, 0.6);
+        expandRuleA.addExpansion(expandStringA_2, 0.4);
         this.currRecursionLevel = 1;
         this.currPos = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.0, 0.0, 0.0, 1.0);
         this.currDirection = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.0, 1.0, 0.0, 0.0);
@@ -16807,9 +16821,7 @@ class LSystem {
         this.barkColor = barkColor;
         let startingTurtle = new __WEBPACK_IMPORTED_MODULE_3__Turtle__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 0.0, 0.0), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 1.0, 0.0), 1, __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create());
         this.turtleArr = [startingTurtle];
-        this.grammarString = ["F", "+X", "+Z", "[", "A", "]",
-            "-Z", "-X", "[", "A", "]"];
-        this.axiomString = "F";
+        this.grammarString = ["F", "A", "["];
         this.currTurtle = 0;
         this.offsetsArray = [];
         this.colorsArray = [];
@@ -16827,7 +16839,8 @@ class LSystem {
             for (let c in this.grammarString) {
                 let currRule = this.expansionRules.get(this.grammarString[c]);
                 if (currRule) {
-                    stringArr = currRule.outputString;
+                    let randVal = Math.random();
+                    stringArr = currRule.returnRandExpansion(randVal);
                     for (let s in stringArr) {
                         outStringArr.push(stringArr[s]);
                     }
@@ -16910,7 +16923,8 @@ class LSystem {
     rotateLeftZ() {
         let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 0.0, 1.0);
         let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, this.theta, zAxis);
+        let rotAngle = this.theta + Math.random() / 10.0;
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, rotAngle, zAxis);
         let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](this.forwardLength, rotAboutZ);
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
@@ -16921,7 +16935,8 @@ class LSystem {
     rotateRightZ() {
         let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 0.0, 1.0);
         let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, -this.theta, zAxis);
+        let rotAngle = this.theta + Math.random() / 10.0;
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, -rotAngle, zAxis);
         let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](this.forwardLength, rotAboutZ);
         this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
         __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
@@ -16930,46 +16945,49 @@ class LSystem {
         return true;
     }
     rotateLeftX() {
-        let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(1.0, 0.0, 0.0);
-        let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, this.theta, zAxis);
-        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](this.forwardLength, rotAboutZ);
-        this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
+        let xAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(1.0, 0.0, 0.0);
+        let rotAboutX = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
+        let rotAngle = this.theta + Math.random() / 10.0;
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutX, rotAngle, xAxis);
+        let rotateAboutX = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](this.forwardLength, rotAboutX);
+        this.currDirection = rotateAboutX.returnNewDirection(this.currDirection);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutX.forwardAmount);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutX.orientationMat);
         this.theColor = this.barkColor;
         return true;
     }
     rotateRightX() {
-        let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(1.0, 0.0, 0.0);
-        let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, -this.theta, zAxis);
-        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](this.forwardLength, rotAboutZ);
-        this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
+        let xAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(1.0, 0.0, 0.0);
+        let rotAboutX = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
+        let rotAngle = this.theta + Math.random() / 10.0;
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutX, -rotAngle, xAxis);
+        let rotateAboutX = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](this.forwardLength, rotAboutX);
+        this.currDirection = rotateAboutX.returnNewDirection(this.currDirection);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutX.forwardAmount);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutX.orientationMat);
         this.theColor = this.barkColor;
         return true;
     }
     rotateLeftY() {
-        let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 1.0, 0.0);
-        let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, this.theta, zAxis);
-        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](this.forwardLength, rotAboutZ);
-        this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
+        let yAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 1.0, 0.0);
+        let rotAboutY = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
+        let rotAngle = this.theta + Math.random() / 10.0;
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutY, rotAngle, yAxis);
+        let rotateAboutY = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](this.forwardLength, rotAboutY);
+        this.currDirection = rotateAboutY.returnNewDirection(this.currDirection);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutY.forwardAmount);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutY.orientationMat);
         this.theColor = this.barkColor;
         return true;
     }
     rotateRightY() {
-        let zAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 1.0, 0.0);
-        let rotAboutZ = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutZ, -this.theta, zAxis);
-        let rotateAboutZ = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](this.forwardLength, rotAboutZ);
-        this.currDirection = rotateAboutZ.returnNewDirection(this.currDirection);
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutZ.forwardAmount);
-        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutZ.orientationMat);
+        let yAxis = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(0.0, 1.0, 0.0);
+        let rotAboutY = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].create();
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].fromRotation(rotAboutY, -this.theta, yAxis);
+        let rotateAboutY = new __WEBPACK_IMPORTED_MODULE_2__DrawingRule__["a" /* default */](this.forwardLength, rotAboutY);
+        this.currDirection = rotateAboutY.returnNewDirection(this.currDirection);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].scaleAndAdd(this.currPos, this.currPos, this.currDirection, rotateAboutY.forwardAmount);
+        __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* mat4 */].mul(this.currTransformMat, this.currTransformMat, rotateAboutY.orientationMat);
         this.theColor = this.barkColor;
         return true;
     }
@@ -16979,7 +16997,7 @@ class LSystem {
         let newTurtle = new __WEBPACK_IMPORTED_MODULE_3__Turtle__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(this.currPos[0], this.currPos[1], this.currPos[2]), __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["c" /* vec3 */].fromValues(this.currDirection[0], this.currDirection[1], this.currDirection[2]), this.currRecursionLevel, currTransformMat);
         this.turtleArr.push(newTurtle);
         this.currRecursionLevel++;
-        this.currScale = 1.0 - (this.currRecursionLevel / 5.0);
+        this.currScale = 1.0 / (this.currRecursionLevel);
         return false;
     }
     loadTurtle(posIn, directionIn, transformMat, currRecursionDepth) {
@@ -17005,9 +17023,26 @@ class LSystem {
 
 "use strict";
 class ExpansionRule {
-    constructor(inputLetterIn, outputStringIn) {
+    constructor(inputLetterIn) {
         this.inputLetter = inputLetterIn;
-        this.outputString = outputStringIn;
+        this.allExpansions = [];
+        this.numExpansions = 0;
+    }
+    addExpansion(expansionIn, probability) {
+        this.allExpansions.push([expansionIn, probability]);
+        this.numExpansions++;
+    }
+    returnRandExpansion(randNumIn) {
+        let randVal = 0.0;
+        let i = 0;
+        while (randVal < 1.0 && i < this.numExpansions) {
+            randVal += this.allExpansions[i][1];
+            if (randNumIn < randVal) {
+                return this.allExpansions[i][0];
+            }
+            i++;
+        }
+        return this.allExpansions[0][0];
     }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = ExpansionRule;
