@@ -6087,8 +6087,8 @@ let angle = PI / 8.0;
 let prevAngle = angle;
 let iterations = 2.0;
 let prevIterations = 2.0;
-let forwardLength = 3.0;
-let prevForwardLength = 3.0;
+let forwardLength = 2.0;
+let prevForwardLength = 2.0;
 let barkColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.4588, 0.2353, 0.1333, 1.0);
 let prevBarkColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.5, 0.25, 0.125, 1.0);
 // Define an object with application parameters and button callbacks
@@ -6096,7 +6096,7 @@ let prevBarkColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].from
 const controls = {
     Iterations: 1.0,
     Angle: PI / 8.0,
-    ForwardLength: 3.0
+    ForwardLength: 2.0
 };
 const colorControl = {
     BarkColor: [128, 64, 32]
@@ -6109,7 +6109,7 @@ let time = 0.0;
 function loadScene() {
     square = new __WEBPACK_IMPORTED_MODULE_3__geometry_Square__["a" /* default */]();
     square.create();
-    cylinder = new __WEBPACK_IMPORTED_MODULE_9__geometry_Cylinder__["a" /* default */]();
+    cylinder = new __WEBPACK_IMPORTED_MODULE_9__geometry_Cylinder__["a" /* default */](forwardLength);
     cylinder.create();
     cube = new __WEBPACK_IMPORTED_MODULE_11__geometry_Cube__["a" /* default */]();
     cube.create();
@@ -6142,7 +6142,7 @@ function main() {
     const gui = new __WEBPACK_IMPORTED_MODULE_2_dat_gui__["GUI"]();
     gui.add(controls, "Iterations", 0, 5).step(1);
     gui.add(controls, "Angle", -PI / 8.0, PI / 8.0).step(0.01);
-    gui.add(controls, "ForwardLength", 1.0, 10.0).step(0.1);
+    gui.add(controls, "ForwardLength", 0.1, 10.0).step(0.1);
     gui.addColor(colorControl, 'BarkColor');
     // get canvas and webgl context
     const canvas = document.getElementById('canvas');
@@ -16657,9 +16657,9 @@ class ShaderProgram {
 
 const root2 = 1.41421346;
 class Cylinder extends __WEBPACK_IMPORTED_MODULE_0__rendering_gl_Drawable__["a" /* default */] {
-    constructor() {
+    constructor(height) {
         super(); // Call the constructor of the super class.
-        this.height = 4.0;
+        this.height = height;
     }
     create() {
         // Positions array
@@ -16899,9 +16899,9 @@ class LSystem {
                 this.col3.push(this.currTransformMat[13]);
                 this.col3.push(this.currTransformMat[14]);
                 this.col3.push(this.currTransformMat[15]);
-                this.offsetsArray.push(this.currPos[0]);
-                this.offsetsArray.push(this.currPos[1]);
-                this.offsetsArray.push(this.currPos[2]);
+                this.offsetsArray.push(this.currPos[0] - this.currDirection[0] * 0.5);
+                this.offsetsArray.push(this.currPos[1] - this.currDirection[1] * 0.5);
+                this.offsetsArray.push(this.currPos[2] - this.currDirection[2] * 0.5);
                 this.scaleArray.push(this.currScale);
                 this.numCylinders++;
             }
