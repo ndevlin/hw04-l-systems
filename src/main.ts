@@ -74,8 +74,11 @@ function loadScene() {
   let col2Out: Float32Array = new Float32Array(lSystem.col2);
   let col3Out: Float32Array = new Float32Array(lSystem.col3);
 
-  //square.setInstanceVBOs(offsets, colors);
-  //square.setNumInstances(lSystem.numCylinders); // grid of "particles"
+
+  let leafOffsets: Float32Array = new Float32Array(lSystem.leafOffsetsArray);
+
+  square.setInstanceVBOs(leafOffsets, colors);
+  square.setNumInstances(lSystem.numLeaves); // grid of "particles"
 
   cylinder.setInstanceVBOs(scale, offsets, colors, col0Out, col1Out, col2Out, col3Out);
   cylinder.setNumInstances(lSystem.numCylinders); // grid of "particles"
@@ -124,6 +127,11 @@ function main() {
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/instanced-frag.glsl')),
   ]);
 
+  const instancedLeafShader = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/instancedLeafVert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/instancedLeafFrag.glsl')),
+  ]);
+
   const flat = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/flat-vert.glsl')),
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/flat-frag.glsl')),
@@ -164,7 +172,8 @@ function main() {
     renderer.clear();
     renderer.render(camera, flat, [screenQuad]);
 
-    //renderer.render(camera, instancedShader, [square,]);
+    renderer.render(camera, instancedLeafShader, [square,]);
+
     renderer.render(camera, instancedShader, [cylinder,]);
 
     stats.end();

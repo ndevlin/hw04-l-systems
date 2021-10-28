@@ -27,6 +27,9 @@ export default class LSystem
 
     // Set up instanced rendering data arrays here.
     offsetsArray: number[];
+
+    leafOffsetsArray: number[];
+
     colorsArray: number[];
     scaleArray: number[];
 
@@ -37,6 +40,8 @@ export default class LSystem
     col3: number[];
 
     numCylinders: number;
+
+    numLeaves: number;
 
     currRecursionLevel: number;
 
@@ -122,6 +127,9 @@ export default class LSystem
         this.currTurtle = 0;
 
         this.offsetsArray = [];
+
+        this.leafOffsetsArray = [];
+
         this.colorsArray = [];
         this.scaleArray = [];
 
@@ -131,6 +139,8 @@ export default class LSystem
         this.col3 = [];
 
         this.numCylinders = 1;
+
+        this.numLeaves = 0;
     }
 
 
@@ -202,43 +212,51 @@ export default class LSystem
             {
                 // Green: Leaf Color
                 this.theColor = vec4.fromValues(0.1647, 0.4863, 0.1373, 1.0);
+            
+                this.leafOffsetsArray.push(this.currPos[0] - this.currDirection[0] * 0.5);
+                this.leafOffsetsArray.push(this.currPos[1] - this.currDirection[1] * 0.5);
+                this.leafOffsetsArray.push(this.currPos[2] - this.currDirection[2] * 0.5);
+
+                this.numLeaves++;
             }
-
-            let func = this.drawRules.get(currString);
-            if(func)
+            else
             {
-               draw = func();
-            }
+                let func = this.drawRules.get(currString);
+                if(func)
+                {
+                draw = func();
+                }
 
-            if(draw)
-            {
-                this.col0.push(this.currTransformMat[0]);
-                this.col0.push(this.currTransformMat[1]);
-                this.col0.push(this.currTransformMat[2]);
-                this.col0.push(this.currTransformMat[3]);
+                if(draw)
+                {
+                    this.col0.push(this.currTransformMat[0]);
+                    this.col0.push(this.currTransformMat[1]);
+                    this.col0.push(this.currTransformMat[2]);
+                    this.col0.push(this.currTransformMat[3]);
 
-                this.col1.push(this.currTransformMat[4]);
-                this.col1.push(this.currTransformMat[5]);
-                this.col1.push(this.currTransformMat[6]);
-                this.col1.push(this.currTransformMat[7]);
+                    this.col1.push(this.currTransformMat[4]);
+                    this.col1.push(this.currTransformMat[5]);
+                    this.col1.push(this.currTransformMat[6]);
+                    this.col1.push(this.currTransformMat[7]);
 
-                this.col2.push(this.currTransformMat[8]);
-                this.col2.push(this.currTransformMat[9]);
-                this.col2.push(this.currTransformMat[10]);
-                this.col2.push(this.currTransformMat[11]);
+                    this.col2.push(this.currTransformMat[8]);
+                    this.col2.push(this.currTransformMat[9]);
+                    this.col2.push(this.currTransformMat[10]);
+                    this.col2.push(this.currTransformMat[11]);
 
-                this.col3.push(this.currTransformMat[12]);
-                this.col3.push(this.currTransformMat[13]);
-                this.col3.push(this.currTransformMat[14]);
-                this.col3.push(this.currTransformMat[15]);
+                    this.col3.push(this.currTransformMat[12]);
+                    this.col3.push(this.currTransformMat[13]);
+                    this.col3.push(this.currTransformMat[14]);
+                    this.col3.push(this.currTransformMat[15]);
 
-                this.offsetsArray.push(this.currPos[0] - this.currDirection[0] * 0.5);
-                this.offsetsArray.push(this.currPos[1] - this.currDirection[1] * 0.5);
-                this.offsetsArray.push(this.currPos[2] - this.currDirection[2] * 0.5);
+                    this.offsetsArray.push(this.currPos[0] - this.currDirection[0] * 0.5);
+                    this.offsetsArray.push(this.currPos[1] - this.currDirection[1] * 0.5);
+                    this.offsetsArray.push(this.currPos[2] - this.currDirection[2] * 0.5);
 
-                this.scaleArray.push(this.currScale);
+                    this.scaleArray.push(this.currScale);
 
-                this.numCylinders++;
+                    this.numCylinders++;
+                }
             }
 
             this.colorsArray.push(this.theColor[0]);
