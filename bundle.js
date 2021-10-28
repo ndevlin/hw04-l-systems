@@ -6125,8 +6125,9 @@ function loadScene() {
     let col1Out = new Float32Array(lSystem.col1);
     let col2Out = new Float32Array(lSystem.col2);
     let col3Out = new Float32Array(lSystem.col3);
-    //square.setInstanceVBOs(offsets, colors);
-    //square.setNumInstances(lSystem.numCylinders); // grid of "particles"
+    let leafOffsets = new Float32Array(lSystem.leafOffsetsArray);
+    square.setInstanceVBOs(leafOffsets, colors);
+    square.setNumInstances(lSystem.numLeaves); // grid of "particles"
     cylinder.setInstanceVBOs(scale, offsets, colors, col0Out, col1Out, col2Out, col3Out);
     cylinder.setNumInstances(lSystem.numCylinders); // grid of "particles"
 }
@@ -6164,9 +6165,13 @@ function main() {
         new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["a" /* Shader */](gl.VERTEX_SHADER, __webpack_require__(75)),
         new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["a" /* Shader */](gl.FRAGMENT_SHADER, __webpack_require__(76)),
     ]);
-    const flat = new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["b" /* default */]([
+    const instancedLeafShader = new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["b" /* default */]([
         new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["a" /* Shader */](gl.VERTEX_SHADER, __webpack_require__(77)),
         new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["a" /* Shader */](gl.FRAGMENT_SHADER, __webpack_require__(78)),
+    ]);
+    const flat = new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["b" /* default */]([
+        new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["a" /* Shader */](gl.VERTEX_SHADER, __webpack_require__(79)),
+        new __WEBPACK_IMPORTED_MODULE_8__rendering_gl_ShaderProgram__["a" /* Shader */](gl.FRAGMENT_SHADER, __webpack_require__(80)),
     ]);
     // This function will be called every frame
     function tick() {
@@ -6192,7 +6197,7 @@ function main() {
         gl.viewport(0, 0, window.innerWidth, window.innerHeight);
         renderer.clear();
         renderer.render(camera, flat, [screenQuad]);
-        //renderer.render(camera, instancedShader, [square,]);
+        renderer.render(camera, instancedLeafShader, [square,]);
         renderer.render(camera, instancedShader, [cylinder,]);
         stats.end();
         // Tell the browser to call `tick` again whenever it renders a new frame
@@ -16824,6 +16829,7 @@ class LSystem {
         this.grammarString = ["F", "A", "["];
         this.currTurtle = 0;
         this.offsetsArray = [];
+        this.leafOffsetsArray = [];
         this.colorsArray = [];
         this.scaleArray = [];
         this.col0 = [];
@@ -16831,6 +16837,7 @@ class LSystem {
         this.col2 = [];
         this.col3 = [];
         this.numCylinders = 1;
+        this.numLeaves = 0;
     }
     expand() {
         let outStringArr = [];
@@ -16881,33 +16888,39 @@ class LSystem {
             if (currString == "L") {
                 // Green: Leaf Color
                 this.theColor = __WEBPACK_IMPORTED_MODULE_0_gl_matrix__["d" /* vec4 */].fromValues(0.1647, 0.4863, 0.1373, 1.0);
+                this.leafOffsetsArray.push(this.currPos[0] - this.currDirection[0] * 0.5);
+                this.leafOffsetsArray.push(this.currPos[1] - this.currDirection[1] * 0.5);
+                this.leafOffsetsArray.push(this.currPos[2] - this.currDirection[2] * 0.5);
+                this.numLeaves++;
             }
-            let func = this.drawRules.get(currString);
-            if (func) {
-                draw = func();
-            }
-            if (draw) {
-                this.col0.push(this.currTransformMat[0]);
-                this.col0.push(this.currTransformMat[1]);
-                this.col0.push(this.currTransformMat[2]);
-                this.col0.push(this.currTransformMat[3]);
-                this.col1.push(this.currTransformMat[4]);
-                this.col1.push(this.currTransformMat[5]);
-                this.col1.push(this.currTransformMat[6]);
-                this.col1.push(this.currTransformMat[7]);
-                this.col2.push(this.currTransformMat[8]);
-                this.col2.push(this.currTransformMat[9]);
-                this.col2.push(this.currTransformMat[10]);
-                this.col2.push(this.currTransformMat[11]);
-                this.col3.push(this.currTransformMat[12]);
-                this.col3.push(this.currTransformMat[13]);
-                this.col3.push(this.currTransformMat[14]);
-                this.col3.push(this.currTransformMat[15]);
-                this.offsetsArray.push(this.currPos[0] - this.currDirection[0] * 0.5);
-                this.offsetsArray.push(this.currPos[1] - this.currDirection[1] * 0.5);
-                this.offsetsArray.push(this.currPos[2] - this.currDirection[2] * 0.5);
-                this.scaleArray.push(this.currScale);
-                this.numCylinders++;
+            else {
+                let func = this.drawRules.get(currString);
+                if (func) {
+                    draw = func();
+                }
+                if (draw) {
+                    this.col0.push(this.currTransformMat[0]);
+                    this.col0.push(this.currTransformMat[1]);
+                    this.col0.push(this.currTransformMat[2]);
+                    this.col0.push(this.currTransformMat[3]);
+                    this.col1.push(this.currTransformMat[4]);
+                    this.col1.push(this.currTransformMat[5]);
+                    this.col1.push(this.currTransformMat[6]);
+                    this.col1.push(this.currTransformMat[7]);
+                    this.col2.push(this.currTransformMat[8]);
+                    this.col2.push(this.currTransformMat[9]);
+                    this.col2.push(this.currTransformMat[10]);
+                    this.col2.push(this.currTransformMat[11]);
+                    this.col3.push(this.currTransformMat[12]);
+                    this.col3.push(this.currTransformMat[13]);
+                    this.col3.push(this.currTransformMat[14]);
+                    this.col3.push(this.currTransformMat[15]);
+                    this.offsetsArray.push(this.currPos[0] - this.currDirection[0] * 0.5);
+                    this.offsetsArray.push(this.currPos[1] - this.currDirection[1] * 0.5);
+                    this.offsetsArray.push(this.currPos[2] - this.currDirection[2] * 0.5);
+                    this.scaleArray.push(this.currScale);
+                    this.numCylinders++;
+                }
             }
             this.colorsArray.push(this.theColor[0]);
             this.colorsArray.push(this.theColor[1]);
@@ -17252,10 +17265,22 @@ module.exports = "#version 300 es\nprecision highp float;\n\nin vec4 fs_Col;\nin
 /* 77 */
 /***/ (function(module, exports) {
 
-module.exports = "#version 300 es\nprecision highp float;\n\n// The vertex shader used to render the background of the scene\n\nin vec4 vs_Pos;\nout vec2 fs_Pos;\n\nvoid main() {\n  fs_Pos = vs_Pos.xy;\n  gl_Position = vs_Pos;\n}\n"
+module.exports = "#version 300 es\n\nuniform mat4 u_ViewProj;\nuniform float u_Time;\n\nuniform mat3 u_CameraAxes; // Used for rendering particles as billboards (quads that are always looking at the camera)\n// gl_Position = center + vs_Pos.x * camRight + vs_Pos.y * camUp;\n\nin vec4 vs_Pos; // Non-instanced; each particle is the same quad drawn in a different place\nin vec4 vs_Nor; // Non-instanced, and presently unused\nin vec4 vs_Col; // An instanced rendering attribute; each particle instance has a different color\nin vec3 vs_Translate; // Another instance rendering attribute used to position each quad instance in the scene\nin vec2 vs_UV; // Non-instanced, and presently unused in main(). Feel free to use it for your meshes.\n\nin float vs_Scale;\n\nout vec4 fs_Col;\nout vec4 fs_Pos;\n\nout float fs_Scale;\n\nout vec4 fs_Nor;\n\nvoid main()\n{\n    fs_Col = vs_Col;\n    fs_Pos = vs_Pos;\n\n    fs_Nor = vs_Nor;\n\n    vec3 offset = vs_Translate;\n\n    //offset.z = (sin((u_Time + offset.x) * 3.14159 * 0.1) + cos((u_Time + offset.y) * 3.14159 * 0.1)) * 1.5;\n    vec3 billboardPos = offset + vs_Pos.x * u_CameraAxes[0] + vs_Pos.y * u_CameraAxes[1];\n    gl_Position = u_ViewProj * vec4(billboardPos, 1.0);\n}\n"
 
 /***/ }),
 /* 78 */
+/***/ (function(module, exports) {
+
+module.exports = "#version 300 es\nprecision highp float;\n\nin vec4 fs_Col;\nin vec4 fs_Pos;\n\nin vec4 fs_Nor;\n\nin float fs_Scale;\n\nin vec4 fs_matCol0;\nin vec4 fs_matCol1;\nin vec4 fs_matCol2;\nin vec4 fs_matCol3;\n\nout vec4 out_Col;\n\nvoid main()\n{\n    //float dist = 1.0 - (length(fs_Pos.xyz) * 2.0);\n    //out_Col = vec4(dist) * fs_Col;\n\n    //out_Col = fs_Col;\n\n    out_Col = vec4(0.1647, 0.4863, 0.1373, 1.0);\n}\n"
+
+/***/ }),
+/* 79 */
+/***/ (function(module, exports) {
+
+module.exports = "#version 300 es\nprecision highp float;\n\n// The vertex shader used to render the background of the scene\n\nin vec4 vs_Pos;\nout vec2 fs_Pos;\n\nvoid main() {\n  fs_Pos = vs_Pos.xy;\n  gl_Position = vs_Pos;\n}\n"
+
+/***/ }),
+/* 80 */
 /***/ (function(module, exports) {
 
 module.exports = "#version 300 es\nprecision highp float;\n\nuniform vec3 u_Eye, u_Ref, u_Up;\nuniform vec2 u_Dimensions;\nuniform float u_Time;\n\nin vec2 fs_Pos;\nout vec4 out_Col;\n\n// Takes in a position vec3, returns a vec3, to be used below as a color\nvec3 noise3D( vec3 p ) \n{\n    float val1 = fract(sin((dot(p, vec3(127.1, 311.7, 191.999)))) * 4.5453);\n\n    float val2 = fract(sin((dot(p, vec3(191.999, 127.1, 311.7)))) * 3.5453);\n\n    float val3 = fract(sin((dot(p, vec3(311.7, 191.999, 127.1)))) * 7.5453);\n\n    return vec3(val1, val2, val3);\n}\n\n// Interpolate in 3 dimensions\nvec3 interpNoise3D(float x, float y, float z) \n{\n    int intX = int(floor(x));\n    float fractX = fract(x);\n    int intY = int(floor(y));\n    float fractY = fract(y);\n    int intZ = int(floor(z));\n    float fractZ = fract(z);\n\n    vec3 v1 = noise3D(vec3(intX, intY, intZ));\n    vec3 v2 = noise3D(vec3(intX + 1, intY, intZ));\n    vec3 v3 = noise3D(vec3(intX, intY + 1, intZ));\n    vec3 v4 = noise3D(vec3(intX + 1, intY + 1, intZ));\n\n    vec3 v5 = noise3D(vec3(intX, intY, intZ + 1));\n    vec3 v6 = noise3D(vec3(intX + 1, intY, intZ + 1));\n    vec3 v7 = noise3D(vec3(intX, intY + 1, intZ + 1));\n    vec3 v8 = noise3D(vec3(intX + 1, intY + 1, intZ + 1));\n\n    vec3 i1 = mix(v1, v2, fractX);\n    vec3 i2 = mix(v3, v4, fractX);\n\n    vec3 i3 = mix(i1, i2, fractY);\n\n    vec3 i4 = mix(v5, v6, fractX);\n    vec3 i5 = mix(v7, v8, fractX);\n\n    vec3 i6 = mix(i4, i5, fractY);\n\n    vec3 i7 = mix(i3, i6, fractZ);\n\n    return i7;\n}\n\n// 3D Fractal Brownian Motion\nvec3 fbm(float x, float y, float z, int octaves) \n{\n    vec3 total = vec3(0.f, 0.f, 0.f);\n\n    float persistence = 0.5f;\n\n    for(int i = 1; i <= octaves; i++) \n    {\n        float freq = pow(3.f, float(i));\n        float amp = pow(persistence, float(i));\n\n        total += interpNoise3D(x * freq, y * freq, z * freq) * amp;\n    }\n    \n    return total;\n}\n\n\nvoid main() \n{\n  //out_Col = vec4(0.5 * (fs_Pos + vec2(1.0)), 0.0, 1.0);\n\n  //out_Col = vec4(0.0, 0.0, 0.0, 1.0);\n\n  float eyeComposite = (u_Eye.x + u_Eye.y + u_Eye.z) / 100.0;\n  vec3 fbmOut = fbm(fs_Pos.x + eyeComposite, fs_Pos.y, 0.0, 12);\n  float greyScale = fbmOut.x / fbmOut.y * fbmOut.z;\n\n  greyScale = pow(greyScale, 0.75);\n\n  out_Col = vec4(greyScale, greyScale, greyScale, 1.0);\n\n  vec4 sunset = vec4(1.0 / fs_Pos[1], 0.3 / fs_Pos[1], 0.0, 1.0);\n\n  if(sunset.y < 0.01)\n  {\n    out_Col = vec4(0.0, 0.0, 0.0, 1.0);\n  }\n  else\n  {\n    out_Col = mix(out_Col, sunset, 1.0 - out_Col.x / 1.25);\n  }\n}\n\n"
